@@ -1,0 +1,18 @@
+# Auto Generated Files
+**/.idea          # Configurações de IDE (IntelliJ, WebStorm, etc.)
+**/.vscode        # Configurações do Visual Studio Code
+**/.DS_Store      # Arquivo de sistema do macOS
+**/target         # Diretório de compilação do Maven/Gradle
+**/build          # Diretório de build em projetos Java/Gradle
+
+# Logs e arquivos temporários
+**/*.log         # Logs de execução
+**/*.tmp         # Arquivos temporários
+**/*.swp         # Arquivos de backup de editores (e.g., Vim)
+**/*.swo         # Arquivos de backup de editores (e.g., Vim)
+
+# Arquivos de configuração
+**/*.iml         # Configurações de projeto do IntelliJ
+**/*.ipr         # Configurações de projeto do IntelliJ
+**/*.iws         # Configurações de workspace do IntelliJ
+**/*.idea        # Configurações de projeto do IntelliJ
