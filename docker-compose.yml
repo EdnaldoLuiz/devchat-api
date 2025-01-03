@@ -1,34 +1,51 @@
 services:
+
+  ########### Websocket API
+
   api:
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: true
     build:
       context: .
       dockerfile: ./docker/api/Dockerfile
     container_name: websocket_api
     ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
+      - "8081:${SERVER_PORT}"
     environment:
-      - SERVER_PORT=${SERVER_PORT}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - ./src:/app/src
+      - SNOWFLAKE_DATACENTER_ID=${SNOWFLAKE_DATACENTER_ID}
+      - SNOWFLAKE_MACHINE_ID=${SNOWFLAKE_MACHINE_ID}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
+  ########### Database
 
   db:
+    restart: always
+    env_file:
+      - path: .env
+        required: true
     build:
       context: ./docker/db
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     container_name: websocket_db
     ports:
-      - "${DB_PORT}:3306"
+      - "3307:${DB_PORT}"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - ./docker/db/volumes/mysql:/var/lib/mysql
