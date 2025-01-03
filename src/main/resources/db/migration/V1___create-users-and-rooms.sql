@@ -1,0 +1,32 @@
+-- Criação da tabela users
+CREATE TABLE users (
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    deleted BOOLEAN DEFAULT FALSE,
+    phone_number VARCHAR(20) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Criação da tabela rooms
+CREATE TABLE rooms (
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description VARCHAR(255) DEFAULT NULL,
+    icon VARCHAR(255) DEFAULT NULL,
+    deleted BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Criação da tabela users_rooms
+CREATE TABLE users_rooms (
+    user_id BIGINT NOT NULL,
+    room_id BIGINT NOT NULL,
+    role ENUM('ADMIN', 'MEMBER') DEFAULT 'MEMBER',
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) 
+        ON DELETE CASCADE,
+    CONSTRAINT fk_room FOREIGN KEY (room_id) REFERENCES rooms (id) 
+        ON DELETE CASCADE,
+    UNIQUE (user_id, room_id) 
+) ENGINE=InnoDB;
