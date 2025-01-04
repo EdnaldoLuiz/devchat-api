@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
+import com.ednaldoluiz.websocket.domain.model.room.UsersRooms;
 import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 @Getter
@@ -24,6 +27,9 @@ public class User extends EntityBase {
 
     @Transient
     private UserStatus status = UserStatus.OFFLINE;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<UsersRooms> userRooms;
 
     public User(SnowflakeIdGenerator idGenerator) {
         super(idGenerator);

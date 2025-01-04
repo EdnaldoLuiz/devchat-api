@@ -1,10 +1,14 @@
 package com.ednaldoluiz.websocket.domain.model.room;
 
+import java.util.Set;
+
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
 import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,6 +30,9 @@ public class Room extends EntityBase {
 
     @Column(name = "deleted", nullable = false)
     private boolean deleted;
+
+    @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
+    private Set<UsersRooms> userRooms;
 
     public Room(SnowflakeIdGenerator idGenerator) {
         super(idGenerator);
