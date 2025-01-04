@@ -21,9 +21,11 @@ CREATE TABLE rooms (
 
 -- Criação da tabela users_rooms
 CREATE TABLE users_rooms (
+    id BIGINT PRIMARY KEY,
     user_id BIGINT NOT NULL,
     room_id BIGINT NOT NULL,
     role ENUM('ADMIN', 'MEMBER') DEFAULT 'MEMBER',
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) 
         ON DELETE CASCADE,
     CONSTRAINT fk_room FOREIGN KEY (room_id) REFERENCES rooms (id) 
