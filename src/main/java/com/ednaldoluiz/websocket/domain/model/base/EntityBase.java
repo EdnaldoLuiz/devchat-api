@@ -40,7 +40,10 @@ public abstract class EntityBase {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public EntityBase(SnowflakeIdGenerator idGenerator) {
+    protected EntityBase(SnowflakeIdGenerator idGenerator) {
         this.id = idGenerator.generateId();
     }
+
+    protected EntityBase() {}
+    
 }
