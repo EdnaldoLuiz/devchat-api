@@ -1,0 +1,24 @@
+-- Criação da tabela chats
+CREATE TABLE chats (
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type ENUM('PRIVATE', 'GROUP') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Criação da tabela users_chats
+CREATE TABLE users_chats (
+    id BIGINT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    chat_id BIGINT NOT NULL,
+    status ENUM('ACTIVE', 'ARCHIVED', 'BLOCKED', 'MUTED') DEFAULT 'ACTIVE',
+    last_read_message_id BIGINT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_chat FOREIGN KEY (user_id) REFERENCES users (id) 
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_chat FOREIGN KEY (chat_id) REFERENCES chats (id) 
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    UNIQUE (user_id, chat_id) 
+);
