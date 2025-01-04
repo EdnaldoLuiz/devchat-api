@@ -2,7 +2,7 @@ package com.ednaldoluiz.websocket.domain.model.room;
 
 import java.util.Set;
 
-import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
+import com.ednaldoluiz.websocket.domain.model.base.AuditableEntityBase;
 import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 import jakarta.persistence.Column;
@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 @Entity(name = "Room")
 @Table(name = "rooms", schema = "websocket")
-public class Room extends EntityBase {
+public class Room extends AuditableEntityBase {
 
     @Column(name = "name", nullable = false, length = 100, unique = true)
     private String name;
