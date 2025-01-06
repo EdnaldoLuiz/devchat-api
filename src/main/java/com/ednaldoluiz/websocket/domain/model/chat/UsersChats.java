@@ -1,6 +1,6 @@
 package com.ednaldoluiz.websocket.domain.model.chat;
 
-import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
+import com.ednaldoluiz.websocket.domain.model.base.TimestampedEntityBase;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
@@ -29,7 +29,7 @@ import jakarta.persistence.Table;
     )
   }
 )
-public class UsersChats extends EntityBase {
+public class UsersChats extends TimestampedEntityBase {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(

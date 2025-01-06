@@ -1,6 +1,6 @@
 package com.ednaldoluiz.websocket.domain.model.chat;
 
-import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
+import com.ednaldoluiz.websocket.domain.model.base.TimestampedEntityBase;
 import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 import jakarta.persistence.Column;
@@ -19,7 +19,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "chats")
-public class Chat extends EntityBase {
+public class Chat extends TimestampedEntityBase {
 
     @Column(name = "name", nullable = false, length = 255)
     private String name;

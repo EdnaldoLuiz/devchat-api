@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import java.util.Set;
 
-import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
+import com.ednaldoluiz.websocket.domain.model.base.TimestampedEntityBase;
 import com.ednaldoluiz.websocket.domain.model.room.UsersRooms;
 import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
@@ -14,7 +14,7 @@ import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 @Setter
 @Entity
 @Table(name = "users", schema = "websocket")
-public class User extends EntityBase {
+public class User extends TimestampedEntityBase {
 
     @Column(name = "name", nullable = false, length = 255)
     private String name;

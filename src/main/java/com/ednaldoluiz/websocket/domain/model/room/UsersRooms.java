@@ -2,6 +2,7 @@ package com.ednaldoluiz.websocket.domain.model.room;
 
 import java.time.LocalDateTime;
 
+import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
@@ -34,7 +35,7 @@ import lombok.Setter;
         @UniqueConstraint(name = "uk_users_rooms_user_room", columnNames = { "user_id", "room_id" })
     }
 )
-public class UsersRooms {
+public class UsersRooms extends EntityBase {
 
     @Id
     private Long id;
