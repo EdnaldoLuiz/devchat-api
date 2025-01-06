@@ -14,17 +14,16 @@ import lombok.Getter;
 /**
  * Classe base especializada para entidades que requerem auditoria completa.
  * 
- * Além dos campos de auditoria temporal herdados de {@link EntityBase}, 
+ * Além dos campos de auditoria temporal herdados de {@link TimestampedEntityBase}, 
  * esta classe adiciona suporte para:
+ * 
  * - Rastrear o usuário que criou o registro (`createdBy`).
  * - Rastrear o usuário que modificou o registro (`updatedBy`).
- * 
- * Entidades que precisam desse nível de auditoria devem herdar desta classe.
  */
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public abstract class AuditableEntityBase extends EntityBase {
+public abstract class AuditableEntityBase extends TimestampedEntityBase {
 
     @CreatedBy
     @Column(name = "created_by", nullable = false, updatable = false)
