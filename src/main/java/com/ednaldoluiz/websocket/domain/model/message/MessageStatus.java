@@ -14,15 +14,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity(name = "MessageStatus")
-@Table(name = "message_status", schema = "websocket")
+@Table(
+    name = "message_status", 
+    schema = "websocket",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_message_status_msg_user", columnNames = { "message_id", "user_id" })
+})
 public class MessageStatus extends EntityBase {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,7 +50,6 @@ public class MessageStatus extends EntityBase {
     @Column(name = "status", nullable = false, columnDefinition = "ENUM('DELIVERED', 'READ', 'DELETED', 'FAILED', 'PENDING')")
     private MessageStatusType status;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 

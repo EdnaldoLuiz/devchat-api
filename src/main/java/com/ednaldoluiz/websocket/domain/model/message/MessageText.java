@@ -28,5 +28,8 @@ public class MessageText implements Serializable {
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
-    
+
+    public MessageText(String content) {
+        this.content = content;
+    }
 }
