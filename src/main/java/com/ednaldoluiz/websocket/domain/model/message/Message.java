@@ -1,13 +1,21 @@
 package com.ednaldoluiz.websocket.domain.model.message;
 
+import java.time.LocalDateTime;
+
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
+import com.ednaldoluiz.websocket.domain.model.chat.Chat;
+import com.ednaldoluiz.websocket.domain.model.user.User;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,7 +32,22 @@ public class Message extends EntityBase {
     )
     private MessageText messageText;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "chat_id", 
+        nullable = false
+    )
+    private Chat chat;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(name = "deleted", nullable = false)
     private boolean deleted;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "sent_at", nullable = false)
+    private LocalDateTime sentAt;
     
 }
