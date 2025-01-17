@@ -24,7 +24,8 @@ CREATE TABLE message_attachments (
     attachment_type ENUM('IMAGE','VIDEO','FILE','AUDIO') NOT NULL,
     url VARCHAR(512) NOT NULL,
     attachment_data MEDIUMBLOB,
-    FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
+    FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE,
+    CHECK (attachment_data IS NOT NULL OR CHAR_LENGTH(url) > 0)
 ) ENGINE=InnoDB;
 
 -- Criação da tabela notifications
@@ -40,7 +41,7 @@ CREATE TABLE notifications (
         ON DELETE CASCADE,
     CONSTRAINT fk_message_notification FOREIGN KEY (message_id) REFERENCES messages (id) 
         ON DELETE CASCADE,
-    INDEX idx_user_notification (user_id, read_at)
+    INDEX idx_user_notification (user_id, read_at),
     CHECK (type = 'MESSAGE' AND message_id IS NOT NULL OR type != 'MESSAGE')
 ) ENGINE = InnoDB;
 
