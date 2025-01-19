@@ -22,7 +22,7 @@ CREATE TABLE rooms (
     updated_by BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    (CHAR_LENGTH(name) >= 3)
+    CHECK (CHAR_LENGTH(name) >= 3)
 ) ENGINE=InnoDB;
 
 -- Criação da tabela users_rooms
