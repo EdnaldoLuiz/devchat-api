@@ -10,5 +10,9 @@ import com.ednaldoluiz.websocket.domain.model.user.User;
 public interface UserRepository extends BaseRepository<User> {
 
     Optional<User> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByPhone(String phone);
     
 }
