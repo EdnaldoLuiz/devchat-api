@@ -35,6 +35,8 @@ public class TimestampedEntityBase extends EntityBase {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    protected TimestampedEntityBase() {}
+
     public TimestampedEntityBase(SnowflakeIdGenerator idGenerator) {
         super(idGenerator);
     }
