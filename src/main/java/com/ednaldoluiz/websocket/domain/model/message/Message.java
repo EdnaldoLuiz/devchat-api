@@ -2,7 +2,6 @@ package com.ednaldoluiz.websocket.domain.model.message;
 
 import java.time.LocalDateTime;
 
-import com.ednaldoluiz.websocket.app.v1.usecase.dto.request.SendMessageRequest;
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
 import com.ednaldoluiz.websocket.domain.model.chat.Chat;
 import com.ednaldoluiz.websocket.domain.model.user.User;
@@ -55,11 +54,11 @@ public class Message extends EntityBase {
         this.deleted = false;
     }
 
-    public Message(SendMessageRequest request, User user, Chat chat) {
-        this.messageText = new MessageText(request.message());
-        this.chat = chat;
-        this.user = user;
-        this.sentAt = LocalDateTime.now();
-        this.deleted = false;
-    }
+    // public Message(SendMessageRequest request, User user, Chat chat) {
+    //     this.messageText = new MessageText(request.message());
+    //     this.chat = chat;
+    //     this.user = user;
+    //     this.sentAt = LocalDateTime.now();
+    //     this.deleted = false;
+    // }
 }
