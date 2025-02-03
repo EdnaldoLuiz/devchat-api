@@ -1,14 +1,16 @@
 -- Criação da tabela users
 CREATE TABLE users (
     id BIGINT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(70) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
     deleted BOOLEAN DEFAULT FALSE,
-    phone_number VARCHAR(20) UNIQUE NOT NULL,
+    phone VARCHAR(20) UNIQUE NOT NULL,
+    avatar VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CHECK (CHAR_LENGTH(name) >= 3),
-    CHECK (phone_number REGEXP '^[0-9]+$')
+    CHECK (phone REGEXP '^[0-9]+$')
 ) ENGINE=InnoDB;
 
 -- Criação da tabela rooms
