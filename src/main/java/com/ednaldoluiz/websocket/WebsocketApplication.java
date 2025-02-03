@@ -1,5 +1,7 @@
 package com.ednaldoluiz.websocket;
 
+import java.util.TimeZone;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,7 +20,9 @@ public class WebsocketApplication {
     }
 
     @PostConstruct
-    public void logDatabaseConnection() {
+    public void onInit() {
+        System.setProperty("user.timezone", "America/Sao_Paulo");
+        TimeZone.setDefault(TimeZone.getTimeZone("America/Sao_Paulo"));
         System.out.println("Conectando ao banco de dados em: " + env.getProperty("spring.datasource.url"));
     }
 }
