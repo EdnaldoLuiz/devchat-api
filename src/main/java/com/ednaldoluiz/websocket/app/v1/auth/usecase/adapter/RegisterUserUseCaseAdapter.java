@@ -32,7 +32,7 @@ public class RegisterUserUseCaseAdapter implements RegisterUserUseCasePort {
         validators.forEach(validator -> validator.validate(request));
 
         String hashedPassword = passwordEncoder.encode(request.password());
-        User user = new User(idGenerator, request.email(), hashedPassword, request.name(), request.phone(), request.avatar());
+        User user = new User(idGenerator, request.email(), hashedPassword, request.name(), request.phone());
 
         userRepository.save(user);
         
