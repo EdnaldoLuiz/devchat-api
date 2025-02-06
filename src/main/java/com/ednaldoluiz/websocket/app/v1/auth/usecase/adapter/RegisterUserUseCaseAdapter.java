@@ -10,12 +10,14 @@ import com.ednaldoluiz.websocket.infra.security.service.JwtService;
 import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class RegisterUserUseCaseAdapter implements RegisterUserUseCasePort {
@@ -28,17 +30,18 @@ public class RegisterUserUseCaseAdapter implements RegisterUserUseCasePort {
 
     @Override
     public RegisterResponse register(RegisterRequest request) {
-
+        log.info("Registering user: {} ........", request.email());
         validators.forEach(validator -> validator.validate(request));
 
         String hashedPassword = passwordEncoder.encode(request.password());
         User user = new User(idGenerator, request.email(), hashedPassword, request.name(), request.phone());
 
         userRepository.save(user);
+        user.clearPassword();
         
         String token = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-
+        log.info("User registered: {} :)", user.getEmail());
         return RegisterResponse.from(user.getId(), user.getEmail(), token, refreshToken);
     }
 }
