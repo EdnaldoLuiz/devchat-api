@@ -1,8 +1,6 @@
 package com.ednaldoluiz.websocket.domain.model.user;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,6 +8,7 @@ import lombok.Setter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -44,6 +43,18 @@ public class User extends TimestampedEntityBase implements UserDetails {
     @Column(name = "deleted", nullable = false, columnDefinition = "boolean default false")
     private boolean deleted;
 
+    @Enumerated(EnumType.STRING)
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+        name = "user_roles", 
+        joinColumns = @JoinColumn(
+            name = "user_id",
+            referencedColumnName = "id"
+        )
+    )
+    @Column(name = "role")
+    private Set<Role> roles = new HashSet<>();
+
     @Transient
     private UserStatus status = UserStatus.OFFLINE;
 
@@ -57,13 +68,13 @@ public class User extends TimestampedEntityBase implements UserDetails {
         super(idGenerator);
     }
 
-    public User(SnowflakeIdGenerator idGenerator, String email, String hashedPassword, String name, String phone, String avatar) {
+    public User(SnowflakeIdGenerator idGenerator, String email, String hashedPassword, String name, String phone) {
         super(idGenerator);
         this.email = email;
         this.password = hashedPassword.toCharArray();
         this.name = name;
         this.phone = phone;
-        this.avatar = avatar;
+        this.roles = Collections.singleton(Role.USER);
     }
 
     public void clearPassword() {
@@ -72,7 +83,7 @@ public class User extends TimestampedEntityBase implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
+        return roles;
     }
 
     @Override
