@@ -51,19 +51,21 @@ public class SwaggerConfig {
     @Bean(name = BeanConstants.SWAGGER_OPEN_API)
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .components(getComponents())
-                .info(getApiInfo())
-                .addSecurityItem(new SecurityRequirement()
-                .addList(BEARER_KEY))
-                .servers(getServers());
+                .components(getComponents()) // Adiciona o esquema de autenticação
+                .info(getApiInfo()) // Configuração de informações da API
+                .addSecurityItem(new SecurityRequirement().addList(BEARER_KEY)) // Aplica autenticação JWT
+                .servers(getServers()); // Adiciona os servidores
     }
 
     private Components getComponents() {
         return new Components()
-                .addSecuritySchemes(BEARER_KEY,
-                        new SecurityScheme().type(SecurityScheme.Type.HTTP)
-                                .scheme(BEARER)
-                                .bearerFormat(JWT));
+                .addSecuritySchemes(BEARER_KEY, new SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme(BEARER)
+                        .bearerFormat(JWT)
+                        .in(SecurityScheme.In.HEADER)
+                        .name("Authorization")
+                        .description("Bearer JWT token"));
     }
 
     private Info getApiInfo() {

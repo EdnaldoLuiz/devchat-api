@@ -3,6 +3,7 @@ package com.ednaldoluiz.websocket.infra.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -16,28 +17,23 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
-import com.ednaldoluiz.websocket.infra.security.entrypoint.AuthEntryPointJwt;
 import com.ednaldoluiz.websocket.infra.security.filter.JwtAuthFilter;
+import com.ednaldoluiz.websocket.infra.security.handler.CustomAccessDeniedHandler;
+import com.ednaldoluiz.websocket.infra.security.handler.CustomAuthFailureHandler;
 import com.ednaldoluiz.websocket.infra.security.handler.CustomLogoutHandler;
 import com.ednaldoluiz.websocket.infra.security.service.CustomUserDetailsService;
-import com.ednaldoluiz.websocket.infra.security.service.JwtService;
+import com.ednaldoluiz.websocket.infra.web.route.Paths;
 import com.ednaldoluiz.websocket.shared.constants.BeanConstants;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableMethodSecurity(
-        prePostEnabled = true,
-        securedEnabled = true,
-        jsr250Enabled = true
-)
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
 
-    private static final String[] WHITE_LIST_URL = {
-            "/api/v1/auth/**",
+    private static final String[] SWAGGER_URLS = {
             "/v2/api-docs",
             "/v3/api-docs",
             "/v3/api-docs/**",
@@ -46,12 +42,19 @@ public class SecurityConfig {
             "/configuration/ui",
             "/configuration/security",
             "/swagger-ui/**",
-            "/webjars/**",
-            "/swagger-ui.html"
+            "/webjars/**"
+    };
+
+    private static final String[] AUTH_WHITELIST = {
+            "/api/v1/auth/login",
+            "/api/v1/auth/register",
+            "/api/v1/auth/generate-password"
     };
 
     private final CustomUserDetailsService customUserDetailsService;
-    private final AuthEntryPointJwt authEntryPointJwt;
+    private final JwtAuthFilter jwtAuthFilter;
+    private final CustomAuthFailureHandler authFailureHandler;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomLogoutHandler logoutHandler;
 
     @Bean(name = BeanConstants.Security.AUTHENTICATION_MANAGER)
@@ -59,7 +62,7 @@ public class SecurityConfig {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(customUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
-        return authentication -> provider.authenticate(authentication); 
+        return provider::authenticate;
     }
 
     @Bean(name = BeanConstants.Security.PASSWORD_ENCODER)
@@ -68,48 +71,35 @@ public class SecurityConfig {
     }
 
     @Bean(name = BeanConstants.Security.SECURITY_FILTER_CHAIN)
-    protected SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtService jwtService) throws Exception {
+    protected SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         final CorsConfiguration cors = new CorsConfiguration().applyPermitDefaultValues();
         cors.addAllowedMethod(HttpMethod.PUT);
         cors.addAllowedMethod(HttpMethod.PATCH);
         cors.addAllowedMethod(HttpMethod.GET);
         cors.addAllowedMethod(HttpMethod.DELETE);
         cors.addAllowedMethod(HttpMethod.POST);
+
         return httpSecurity
-                // Configuração CORS
-                .cors(crs -> crs.configurationSource(request -> cors))
-                
-                // Desabilitar CSRF já que estamos usando JWT
+                .cors(corsConfigurer -> corsConfigurer.configurationSource(request -> cors))
                 .csrf(AbstractHttpConfigurer::disable)
-                
-                // Configuração de autorizações
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(WHITE_LIST_URL).permitAll()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(SWAGGER_URLS).permitAll()
+                        .requestMatchers(AUTH_WHITELIST).permitAll()
                         .requestMatchers("/actuator/**").hasAuthority("ADMIN")
-                        .anyRequest().authenticated()
-                )
-                
-                // Configuração de sessão: sem estado
+                        .requestMatchers("/api/v1/auth/logout").authenticated()
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // Configuração de autenticação
                 .authenticationManager(authenticationManager())
-
-                // Configuração de exceções
-                .exceptionHandling(config -> config.authenticationEntryPoint(this.authEntryPointJwt))
-                
-                // Adicionar filtros JWT
-                .addFilterBefore(new JwtAuthFilter(jwtService, customUserDetailsService), UsernamePasswordAuthenticationFilter.class)
-                
-                // Configuração de logout
-                .logout(logout -> logout
-                    .logoutUrl("/api/v1/auth/logout")
-                    .addLogoutHandler(this.logoutHandler)
-                    .logoutSuccessHandler((request, response, authentication) -> {
-                        response.setStatus(HttpServletResponse.SC_OK);
-                    })
-                )
-                
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authFailureHandler)
+                        .accessDeniedHandler(accessDeniedHandler))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout(logoutConfigurer -> logoutConfigurer
+                        .logoutUrl("/api/v1/auth/logout")
+                        .addLogoutHandler(logoutHandler)
+                        .logoutSuccessHandler(
+                            (request, response, authentication) -> response.setStatus(HttpStatus.OK.value())
+                        ))
                 .build();
     }
 }

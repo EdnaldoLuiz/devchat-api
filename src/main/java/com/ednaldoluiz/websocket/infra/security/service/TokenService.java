@@ -31,7 +31,6 @@ public class TokenService {
      * Verifica se o token está na blacklist.
      */
     public boolean isTokenBlacklisted(String jti) {
-        return false;
-        //return Boolean.TRUE.equals(redisTemplate.hasKey(REDIS_BLACKLIST_PREFIX + jti));
+        return Boolean.TRUE.equals(redisTemplate.hasKey(REDIS_BLACKLIST_PREFIX + jti));
     }
 }

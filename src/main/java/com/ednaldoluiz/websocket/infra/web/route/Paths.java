@@ -17,5 +17,6 @@ public interface Paths {
         String LOGIN = "/login";
         String REGISTER = "/register";
         String GENERATE_PASSWORD = "/generate-password";
+        String LOGOUT = "/logout";
     }
 }

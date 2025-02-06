@@ -15,7 +15,9 @@ public interface AuthDocs {
 
     interface Register {
         String SUMMARY = "Registro de Usuário";
+
         String DESCRIPTION = """
+            <html>
                 <body>
                     <h3>Detalhes do RegisterRequest</h3>
                     <table cellpadding="5" cellspacing="0">
@@ -67,7 +69,9 @@ public interface AuthDocs {
                         </tbody>
                     </table>
                 </body>
+            </html>
             """;
+
             String STATUS_201_RESPONSE = """
                 {
                     "userId": 123456789,
@@ -101,7 +105,9 @@ public interface AuthDocs {
 
     public interface Login {
         String SUMMARY = "Login de Usuário";
+        
         String DESCRIPTION = """
+            <html>
                 <body>
                     <h3>Detalhes do LoginRequest</h3>
                     <table cellpadding="5" cellspacing="0">
@@ -132,7 +138,8 @@ public interface AuthDocs {
                         </tbody>
                     </table>
                 </body>
-        """;
+            </html>""";
+
         String STATUS_200_RESPONSE = """
             {
                 "email": "usuario@email.com",
@@ -194,6 +201,32 @@ public interface AuthDocs {
             {
                 "password": "V^sWXF0ibfNzo^-Ib!i?",
                 "strengthScore": 100
+            }
+        """;
+    }
+
+    /**
+     * Documentação para o endpoint de logout de usuário.
+     */
+
+    interface Logout {
+        String SUMMARY = "Logout de Usuário";
+        String DESCRIPTION = """
+            <html>
+                <body>
+                    <h3>Logout de Usuário</h3>
+                    <p>Este endpoint realiza o logout de um usuário autenticado.</p>
+                    <p>Para realizar o logout, é necessário enviar o token de acesso do usuário.</p>
+                </body>
+            </html>
+            """;
+
+        String STATUS_200_RESPONSE = """
+            {
+                "timestamp": "2025-02-05 12:30:45",
+                "status": 200,
+                "message": "Logout realizado com sucesso.",
+                "path": "/api/v1/auth/logout"
             }
         """;
     }
