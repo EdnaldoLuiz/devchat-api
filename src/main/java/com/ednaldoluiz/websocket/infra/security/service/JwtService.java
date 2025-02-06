@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
@@ -18,6 +19,8 @@ import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import com.ednaldoluiz.websocket.domain.model.user.User;
 
 @Slf4j
 @Service
@@ -58,6 +61,14 @@ public class JwtService {
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
         extraClaims.put("jti", UUID.randomUUID().toString());
+
+        if (userDetails instanceof User user) {
+            extraClaims.put("roles", user.getRoles()
+                .stream()
+                .map(Enum::name)
+                .toList());
+        }
+    
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -67,6 +78,10 @@ public class JwtService {
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    public List<String> extractRoles(String token) {
+        return extractClaim(token, claims -> (List<String>) claims.get("roles"));
+    }    
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String jti = extractClaim(token, Claims::getId);
