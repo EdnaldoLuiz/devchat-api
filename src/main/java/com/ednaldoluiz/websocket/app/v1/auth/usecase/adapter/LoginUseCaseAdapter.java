@@ -10,6 +10,8 @@ import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.LoginUseCasePort;
 import com.ednaldoluiz.websocket.app.v1.auth.validator.LoginValidator;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
+import com.ednaldoluiz.websocket.infra.security.service.JwtService;
+import com.ednaldoluiz.websocket.infra.web.handler.exception.LoginValidationException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,14 +23,21 @@ public class LoginUseCaseAdapter implements LoginUseCasePort {
     
     private final List<LoginValidator> validators;
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
     @Override
     public LoginResponse login(LoginRequest request) {
         log.info("Logging in user: {} ........", request.email());
         validators.forEach(validator -> validator.validate(request));
+        
+        User user = userRepository
+            .findByEmail(request.email())
+            .orElseThrow(LoginValidationException::new);
 
-        User user = userRepository.findByEmailAndDeleted(request.email()).orElseThrow();
+        String token = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
 
-        return new LoginResponse(null, null);
+        log.info("User logged in: {} :)", user.getEmail());
+        return LoginResponse.from(user.getEmail(), user.getName(), user.getAvatar(), token, refreshToken);
     }
 }

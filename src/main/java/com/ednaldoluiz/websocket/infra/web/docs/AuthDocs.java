@@ -72,15 +72,25 @@ public interface AuthDocs {
                 {
                     "userId": 123456789,
                     "email": "usuario@email.com",
-                    "token": "eyJhbGciOiJIUzI1...",
-                    "refreshToken": "eyJhbGciOiJIUzI1..."
+                    "tokens": [
+                        {
+                            "type": "ACCESS",
+                            "value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJVU0VSIl0sImp0aSI6IjE1OWFiODRlLWEyNGUtNGRlOC1hMTg0LTYwYjgzNTZmZDYzYiIsInN1YiI6InVzdWFyaW9AZW1haWwuY29tIiwiaWF0IjoxNzM4ODA1MzU1LCJleHAiOjE3Mzg4OTE3NTV9.k6-OFtPj1JDGgo9uIN7TjjpwlJscF35L15CjFpqRyNA"
+                        },
+                        {
+                            "type": "REFRESH",
+                            "value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJVU0VSIl0sImp0aSI6ImZlNGNhNDAyLWIzMzctNDQyMC1iMWNhLWI5Nzc0OGE3YTcwZiIsInN1YiI6InVzdWFyaW9AZW1haWwuY29tIiwiaWF0IjoxNzM4ODA1MzU1LCJleHAiOjE3Mzg4OTE3NTV9.qEQ_QLt3OFxaJ0Q_gvWOCE0LZ-lThCXufvaejiZCEaQ"
+                        }
+                    ]
                 }
             """;
             String STATUS_400_RESPONSE = """
                 {
+                    "timestamp": "2025-02-05 12:30:45",
                     "status": 400,
-                    "error": "Validation Error",
+                    "error": "Erro de validação com as credenciais do usuário",
                     "message": "Erros de validação encontrados.",
+                    "path": "/api/v1/auth/register",
                     "fieldErrors": [
                         {"field": "email", "message": "O email informado é inválido."},
                         {"field": "password", "message": "A senha deve ter entre 8 e 20 caracteres."}
@@ -123,8 +133,33 @@ public interface AuthDocs {
                     </table>
                 </body>
         """;
-        String STATUS_200_RESPONSE = "null";
-        String STATUS_400_RESPONSE = "null";
+        String STATUS_200_RESPONSE = """
+            {
+                "email": "usuario@email.com",
+                "name": "Usuário",
+                "avatar": "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50x",
+                "tokens": [
+                    {
+                        "type": "ACCESS",
+                        "value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJVU0VSIl0sImp0aSI6IjE1OWFiODRlLWEyNGUtNGRlOC1hMTg0LTYwYjgzNTZmZDYzYiIsInN1YiI6InVzdWFyaW9AZW1haWwuY29tIiwiaWF0IjoxNzM4ODA1MzU1LCJleHAiOjE3Mzg4OTE3NTV9.k6-OFtPj1JDGgo9uIN7TjjpwlJscF35L15CjFpqRyNA"
+                    },
+                    {
+                        "type": "REFRESH",
+                        "value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJVU0VSIl0sImp0aSI6ImZlNGNhNDAyLWIzMzctNDQyMC1iMWNhLWI5Nzc0OGE3YTcwZiIsInN1YiI6InVzdWFyaW9AZW1haWwuY29tIiwiaWF0IjoxNzM4ODA1MzU1LCJleHAiOjE3Mzg4OTE3NTV9.qEQ_QLt3OFxaJ0Q_gvWOCE0LZ-lThCXufvaejiZCEaQ"
+                    }
+                ]
+            }
+        """;
+
+        String STATUS_401_RESPONSE = """
+            {
+                "timestamp": "2025-02-05 12:30:45",
+                "status": 401,
+                "error": "Não autorizado",
+                "message": "Email ou senha inválidos.",
+                "path": "/api/v1/auth/login"
+            }
+        """;
     }
 
     /**

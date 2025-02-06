@@ -40,6 +40,7 @@ public class AuthController {
     private final RegisterUserUseCasePort registerPort;
     private final LoginUseCasePort loginPort;
     private final GeneratePasswordUseCasePort generatePasswordUseCase;
+
     /**
      * Endpoint para registrar um novo usuário.
      *
@@ -79,6 +80,12 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Endpoint para autenticar um usuário.
+     *
+     * @param request Objeto contendo os dados necessários para a autenticação do usuário.
+     * @return Objeto contendo ID, email, token e refresh token do usuário autenticado.
+     */
     @PostMapping(Paths.Auth.LOGIN)
     @Operation(
         summary = AuthDocs.Login.SUMMARY, 
@@ -92,11 +99,11 @@ public class AuthController {
                 examples = @ExampleObject(value = AuthDocs.Login.STATUS_200_RESPONSE)
             )
         }),
-        @ApiResponse(responseCode = "400", description = "Erro de validação no login.", content = {
+        @ApiResponse(responseCode = "401", description = "Erro de validação no login.", content = {
             @Content(
                 mediaType = MediaType.APPLICATION_JSON_VALUE,
                 schema = @Schema(implementation = ErrorResponse.class),
-                examples = @ExampleObject(value = AuthDocs.Login.STATUS_400_RESPONSE)
+                examples = @ExampleObject(value = AuthDocs.Login.STATUS_401_RESPONSE)
             )
         }),
     })
