@@ -13,6 +13,13 @@ CREATE TABLE users (
     CHECK (phone REGEXP '^[0-9]+$')
 ) ENGINE=InnoDB;
 
+CREATE TABLE user_roles (
+    user_id BIGINT NOT NULL,
+    role ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
+    CONSTRAINT fk_user_roles FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    UNIQUE (user_id, role) -- Impede duplicação de roles para o mesmo usuário
+) ENGINE=InnoDB;
+
 -- Criação da tabela rooms
 CREATE TABLE rooms (
     id BIGINT PRIMARY KEY,
