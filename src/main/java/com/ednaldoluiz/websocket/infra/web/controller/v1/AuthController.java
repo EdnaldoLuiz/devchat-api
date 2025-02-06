@@ -6,10 +6,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.LoginRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.GeneratedPasswordResponse;
+import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.LoginResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.RegisterResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.GeneratePasswordUseCasePort;
+import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.LoginUseCasePort;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.RegisterUserUseCasePort;
 import com.ednaldoluiz.websocket.infra.web.docs.AuthDocs;
 import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
@@ -35,6 +38,7 @@ import jakarta.validation.Valid;
 public class AuthController {
 
     private final RegisterUserUseCasePort registerPort;
+    private final LoginUseCasePort loginPort;
     private final GeneratePasswordUseCasePort generatePasswordUseCase;
     /**
      * Endpoint para registrar um novo usuário.
@@ -75,6 +79,39 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PostMapping(Paths.Auth.LOGIN)
+    @Operation(
+        summary = AuthDocs.Login.SUMMARY, 
+        description = AuthDocs.Login.DESCRIPTION
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Usuário autenticado com sucesso.", content = {
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE, 
+                schema = @Schema(implementation = RegisterResponse.class),
+                examples = @ExampleObject(value = AuthDocs.Login.STATUS_200_RESPONSE)
+            )
+        }),
+        @ApiResponse(responseCode = "400", description = "Erro de validação no login.", content = {
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ErrorResponse.class),
+                examples = @ExampleObject(value = AuthDocs.Login.STATUS_400_RESPONSE)
+            )
+        }),
+    })
+    public ResponseEntity<LoginResponse> login(
+            @Parameter(
+                description = "Dados para autenticar um usuário.", 
+                required = true,
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, 
+                schema = @Schema(implementation = LoginRequest.class))
+            ) @Valid @RequestBody LoginRequest request
+        ) {
+        LoginResponse response = loginPort.login(request);
+        return ResponseEntity.ok(response);
+    }
+
     /**
      * Endpoint para gerar uma senha segura automaticamente.
      *
@@ -91,9 +128,6 @@ public class AuthController {
                 mediaType = MediaType.APPLICATION_JSON_VALUE,
                 examples = @ExampleObject(value = AuthDocs.GeneratePassword.STATUS_200_RESPONSE)
             )
-        }),
-        @ApiResponse(responseCode = "500", description = "Erro ao gerar senha segura.", content = {
-            @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
         })
     })
     public ResponseEntity<GeneratedPasswordResponse> generateStrongPassword() {

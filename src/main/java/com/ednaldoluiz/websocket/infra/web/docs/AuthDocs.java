@@ -16,7 +16,6 @@ public interface AuthDocs {
     interface Register {
         String SUMMARY = "Registro de Usuário";
         String DESCRIPTION = """
-            <html>
                 <body>
                     <h3>Detalhes do RegisterRequest</h3>
                     <table cellpadding="5" cellspacing="0">
@@ -68,7 +67,6 @@ public interface AuthDocs {
                         </tbody>
                     </table>
                 </body>
-            </html>
             """;
             String STATUS_201_RESPONSE = """
                 {
@@ -89,6 +87,44 @@ public interface AuthDocs {
                     ]
                 }
             """;
+    }
+
+    public interface Login {
+        String SUMMARY = "Login de Usuário";
+        String DESCRIPTION = """
+                <body>
+                    <h3>Detalhes do LoginRequest</h3>
+                    <table cellpadding="5" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Campo</th>
+                                <th>Validado por</th>
+                                <th>Descrição</th>
+                                <th>Exemplo</th>
+                                <th>Regras de Validação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>email</strong></td>
+                                <td>`@Email`, `@NotBlank`</td>
+                                <td>Email do usuário.</td>
+                                <td>luiz@gmail.com</td>
+                                <td>Deve ser um email válido e não pode estar em branco, contendo "@" e um "." após o domínio.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>password</strong></td>
+                                <td>`@NotBlank`,`@Size(min=8, max=20)`</td>
+                                <td>Senha do usuário.</td>
+                                <td>Abcde123+</td>
+                                <td>Deve ter entre 8 e 20 caracteres, conter ao menos 1 minúsculo, 1 maiúsculo, 1 número e 1 caractere especial.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </body>
+        """;
+        String STATUS_200_RESPONSE = "null";
+        String STATUS_400_RESPONSE = "null";
     }
 
     /**
