@@ -22,7 +22,6 @@ import com.ednaldoluiz.websocket.infra.security.handler.CustomAccessDeniedHandle
 import com.ednaldoluiz.websocket.infra.security.handler.CustomAuthFailureHandler;
 import com.ednaldoluiz.websocket.infra.security.handler.CustomLogoutHandler;
 import com.ednaldoluiz.websocket.infra.security.service.CustomUserDetailsService;
-import com.ednaldoluiz.websocket.infra.web.route.Paths;
 import com.ednaldoluiz.websocket.shared.constants.BeanConstants;
 
 import lombok.RequiredArgsConstructor;
@@ -96,6 +95,9 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logoutConfigurer -> logoutConfigurer
                         .logoutUrl("/api/v1/auth/logout")
+                        .logoutSuccessUrl("/api/v1/auth/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
                         .addLogoutHandler(logoutHandler)
                         .logoutSuccessHandler(
                             (request, response, authentication) -> response.setStatus(HttpStatus.OK.value())

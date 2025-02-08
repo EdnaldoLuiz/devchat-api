@@ -1,5 +1,6 @@
 package com.ednaldoluiz.websocket.infra.security.service;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
+    @Cacheable(cacheNames = "userDetailsCache", key = "#username")
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository
             .findByEmail(username)

@@ -11,7 +11,6 @@ import com.ednaldoluiz.websocket.infra.security.service.JwtService;
 import com.ednaldoluiz.websocket.infra.security.service.TokenService;
 
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +26,10 @@ public class CustomLogoutHandler implements LogoutHandler {
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        if (authentication == null || authentication.getName() == null) {
-            log.warn("Tentativa de logout sem usuário autenticado. Provavelmente o token já foi invalidado.");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
-        }
+        log.info("Iniciando processo de logout.");
+
+        String authHeader = request.getHeader("Authorization");
+        log.info("Valor do header Authorization: {}", authHeader);
 
         if (!handleLogout(request)) {
             log.warn("Falha ao processar o logout. Token inválido ou ausente.");
@@ -39,32 +37,26 @@ public class CustomLogoutHandler implements LogoutHandler {
             return;
         }
 
-        clearCookies(response);
         SecurityContextHolder.clearContext();
         response.setStatus(HttpServletResponse.SC_OK);
-        log.info("Usuário {} deslogado com sucesso.", authentication.getName());
+        log.info("Logout realizado com sucesso.");
     }
 
     private boolean handleLogout(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.warn("Header Authorization está ausente ou não começa com 'Bearer '.");
             return false;
         }
 
         String token = authHeader.substring(7);
+        log.info("Token extraído: {}", token);
         String jti = jwtService.extractClaim(token, Claims::getId);
         Date expiration = jwtService.extractClaim(token, Claims::getExpiration);
 
         log.info("Invalidando token JWT: {}", jti);
         tokenService.invalidateToken(jti, expiration);
+        log.info("Token invalidado com sucesso.");
         return true;
-    }
-
-    private void clearCookies(HttpServletResponse response) {
-        Cookie cookie = new Cookie("JSESSIONID", null);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
     }
 }

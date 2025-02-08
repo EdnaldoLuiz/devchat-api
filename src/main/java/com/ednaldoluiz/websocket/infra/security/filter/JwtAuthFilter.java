@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.infra.security.service.JwtService;
 
 import jakarta.servlet.FilterChain;
@@ -48,7 +49,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private boolean isExcludedPath(HttpServletRequest request) {
-        return request.getServletPath().contains("/api/v1/auth");
+        String path = request.getServletPath();
+        log.info("Path: {}", path);
+        return path.matches("/api/v1/auth/login|/api/v1/auth/register|/api/v1/auth/generate-password");
     }
 
     private Optional<String> extractJwtFromHeader(HttpServletRequest request) {
@@ -57,7 +60,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return Optional.of(authHeader.substring(7));
         }
-        
+
         return Optional.empty();
     }
 
@@ -72,7 +75,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 if (isTokenValid(jwt, userDetails)) {
                     setAuthentication(userDetails, request);
-                    log.info("User authenticated: {}", userDetails);
+                    log.info("User authenticated: {}", userDetails.getUsername());
                 }
             }
         } catch (Exception e) {
@@ -88,8 +91,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,
-                userDetails.getAuthorities()
-        );
+                userDetails.getAuthorities());
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
