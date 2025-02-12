@@ -18,13 +18,21 @@ public record RegisterRequest(
     )
     String email,
 
-    @NotBlank(message = "{register.password.notBlank}")
+    @NotBlank(message = "{register.password.confirmation.notBlank}")
     @Size(min = 8, max = 20, message = "{register.password.size}")
     @Schema(
         description = "Senha do usuário. Deve conter pelo menos 8 caracteres, incluindo letras maiúsculas, minúsculas, números e caracteres especiais.",
         example = "SenhaForte123!"
     )
     String password,
+
+    @NotBlank(message = "{register.confirmPassword.notBlank}")
+    @Size(min = 8, max = 20, message = "{register.confirmPassword.size}")
+    @Schema(
+        description = "Confirmação da senha do usuário. Deve ser igual à senha.",
+        example = "SenhaForte123!"
+    )
+    String confirmPassword,
 
     @NotBlank(message = "{register.name.notBlank}")
     @Size(min = 3, max = 50, message = "{register.name.size}")
