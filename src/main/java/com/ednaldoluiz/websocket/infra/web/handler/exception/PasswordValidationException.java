@@ -19,4 +19,9 @@ public class PasswordValidationException extends RuntimeException {
         super("Erro de validação da senha");
         this.errors = errors;
     }
+
+    public PasswordValidationException(String error) {
+        super("As senhas não coincidem.");
+        this.errors = List.of(new FieldErrorResponse("password", error));
+    }
 }

@@ -46,6 +46,13 @@ public interface AuthDocs {
                                 <td>Deve ter entre 8 e 20 caracteres, conter ao menos 1 minúsculo, 1 maiúsculo, 1 número e 1 caractere especial.</td>
                             </tr>
                             <tr>
+                                <td><strong>confirmPassword</strong></td>
+                                <td>`@NotBlank`,`@Size(min=8, max=20)`</td>
+                                <td>Confirmação da senha do usuário.</td>
+                                <td>Abcde123+</td>
+                                <td>Deve ser igual à senha informada.</td>
+                            </tr>
+                            <tr>
                                 <td><strong>name</strong></td>
                                 <td>`@NotBlank`, `@Size(min=3, max=50)`</td>
                                 <td>Nome do usuário.</td>
