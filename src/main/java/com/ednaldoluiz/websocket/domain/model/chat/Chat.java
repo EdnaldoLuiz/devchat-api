@@ -28,6 +28,10 @@ public class Chat extends TimestampedEntityBase {
     @Column(name = "type", nullable = false, columnDefinition = "ENUM('PRIVATE', 'GROUP')")
     private ChatType type;
 
+    public Chat() {
+        super();
+    }
+
     public Chat(SnowflakeIdGenerator idGenerator) {
         super(idGenerator);
     }

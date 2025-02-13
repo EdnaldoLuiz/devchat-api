@@ -1,6 +1,9 @@
 package com.ednaldoluiz.websocket.domain.model.message;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity(name = "MessageText")
-@Table(name = "message_text", schema = "websocket")
+@Table(name = "message_texts", schema = "websocket")
 public class MessageText implements Serializable { 
 
     @Id
@@ -24,12 +27,16 @@ public class MessageText implements Serializable {
     @OneToOne
     @MapsId
     @JoinColumn(name = "message_id")
+    @JsonBackReference
     private Message message;
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
+    public MessageText() {}
+
     public MessageText(String content) {
         this.content = content;
+        this.message.setSentAt(LocalDateTime.now());
     }
 }

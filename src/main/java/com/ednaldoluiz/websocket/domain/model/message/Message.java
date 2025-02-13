@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
 import com.ednaldoluiz.websocket.domain.model.chat.Chat;
 import com.ednaldoluiz.websocket.domain.model.user.User;
+import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -30,6 +32,7 @@ public class Message extends EntityBase {
         cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE }, 
         fetch = FetchType.LAZY
     )
+    @JsonManagedReference
     private MessageText messageText;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -51,6 +54,11 @@ public class Message extends EntityBase {
     private LocalDateTime sentAt;
 
     public Message() {
+        this.deleted = false;
+    }
+
+    public Message(SnowflakeIdGenerator idGenerator) {
+        super(idGenerator);
         this.deleted = false;
     }
 

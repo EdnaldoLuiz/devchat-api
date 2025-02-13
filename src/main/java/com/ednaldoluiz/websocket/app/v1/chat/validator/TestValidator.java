@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.app.v1.message.validator;
+package com.ednaldoluiz.websocket.app.v1.chat.validator;
 
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.LoginRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.RegisterRequest;
