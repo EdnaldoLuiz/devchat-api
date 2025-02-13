@@ -10,11 +10,15 @@ public record ErrorResponse(
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime timestamp,
+
     int status,
     String error,
     String message,
     String path,
-    List<FieldErrorResponse> fieldErrors, // Lista de erros detalhados
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    List<FieldErrorResponse> fieldErrors,
+    
     String cause,
     StackTraceElement[] stackTrace
 ) {
