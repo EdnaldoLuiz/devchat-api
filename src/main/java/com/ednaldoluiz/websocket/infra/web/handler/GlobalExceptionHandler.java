@@ -14,6 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.ednaldoluiz.websocket.infra.web.handler.exception.LoginValidationException;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.PasswordValidationException;
+import com.ednaldoluiz.websocket.infra.web.handler.exception.RateLimitException;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.RegisterValidationException;
 
 import java.util.List;
@@ -34,7 +35,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({RegisterValidationException.class, LoginValidationException.class})
     public ResponseEntity<ErrorResponse> handleRegisterValidationException(
-            RegisterValidationException ex, HttpServletRequest request) {
+            RuntimeException ex, HttpServletRequest request) {
 
         ErrorResponse errorResponse = new ErrorResponse(
                 "Erro de validação com as credenciais do usuário",
@@ -57,6 +58,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getErrors());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RateLimitException.class)
+    public ResponseEntity<ErrorResponse> handleRateLimitException(
+            RateLimitException ex, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                ex.getMessage() + ". Tente novamente em " + ex.getRetryAfterSeconds() + " segundos.",
+                HttpStatus.TOO_MANY_REQUESTS.value(),
+                "Limite de requisições excedido",
+                ex.getPath()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.TOO_MANY_REQUESTS);
     }
 
     @Override
