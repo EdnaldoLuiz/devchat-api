@@ -4,4 +4,4 @@ public record RateLimitRule(
         String path,
         int capacity,
         int refillInterval
-) {}
+) implements RateLimitPolicy {}

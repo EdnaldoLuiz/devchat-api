@@ -1,8 +1,6 @@
 package com.ednaldoluiz.websocket.infra.security.ratelimit;
 
 import java.time.Duration;
-import java.util.Optional;
-
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -11,82 +9,122 @@ import com.ednaldoluiz.websocket.infra.web.handler.exception.RateLimitException;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Implementa a lógica de rate limit usando Redis puro (Fixed Window).
- * - Cada rota tem uma capacidade (requests) e um interval (minutos).
- * - Armazena a contagem de requests em Redis com TTL = interval.
+ * Exemplo de Rate Limit usando Redis manualmente, com bloqueio exponencial.
+ * 
+ * SOLID:
+ * - Single Responsibility: só cuida de verificar/atualizar contadores no Redis.
+ * - Open/Closed: Se quisermos outro tipo de bloqueio (linear, p.ex.), basta trocar a formula.
  */
 @Service
 @RequiredArgsConstructor
 public class RedisRateLimitService {
 
     private final StringRedisTemplate redisTemplate;
-    private final RateLimitProperties rateLimitProperties;
+    private final RateLimitRouter rateLimitRouter;
 
     /**
-     * Aplica o rate limit (1 request) para o IP/rota.
-     * Retorna quantas requisições RESTAM, ou lança RateLimitException se estourou.
-     *
-     * @param path Rota acessada
-     * @param clientIP IP do cliente
-     * @return Número de requisições restantes no intervalo
+     * Verifica se o IP pode fazer +1 requisição na rota. 
+     * Se ultrapassar o limite, lança exceção com o tempo em segundos p/ liberar.
+     * 
+     * @return quantas requisições RESTAM.
      */
     public long checkRateLimitAndIncrement(String path, String clientIP) {
-        // 1) Busca a regra específica (ou a default)
-        RateLimitRule rule = matchRule(path);
+        // 1) Descobre a politica
+        RateLimitPolicy policy = rateLimitRouter.resolvePolicy(path);
 
-        // 2) Monta a chave no Redis
-        String key = "rate-limit:" + clientIP + ":" + path;
+        // 2) Monta chaves
+        String countKey = buildCountKey(clientIP, path);
+        String blockKey = buildBlockKey(clientIP, path);
 
-        // 3) Lê a contagem atual
-        String currentValue = redisTemplate.opsForValue().get(key);
-        long used = (currentValue != null) ? Long.parseLong(currentValue) : 0;
+        // 3) Lê contadores do Redis
+        long used = getLong(countKey, 0L);
+        long blockCount = getLong(blockKey, 0L);
 
-        // 4) Verifica se ainda está dentro do limite
-        if (used >= rule.capacity()) {
-            // Já estourou
-            long ttl = getTimeToResetSeconds(key);
-            // Lança exception com o tempo que falta
+        // 4) Se usou >= capacity, checa se já está bloqueado ou inicia um bloqueio novo
+        if (used >= policy.capacity()) {
+            return handleBlocked(path, policy, countKey, blockKey, used, blockCount);
+        }
+
+        // 5) Se não excedeu, incrementa contagem
+        used += 1;
+        redisTemplate.opsForValue().set(countKey, String.valueOf(used));
+
+        // Se for a 1ª vez nessa janela (e não estava bloqueado),
+        // define a TTL = refillInterval (min) pro countKey
+        if (used == 1 && blockCount == 0) {
+            redisTemplate.expire(countKey, Duration.ofMinutes(policy.refillInterval()));
+        }
+
+        // Calcula quanto resta
+        return policy.capacity() - used;
+    }
+
+    /**
+     * Trata a situação em que o usuário já atingiu ou excedeu a capacidade.
+     */
+    private long handleBlocked(String path, RateLimitPolicy policy,
+            String countKey, String blockKey,
+            long used, long blockCount) {
+
+        // Se ainda tiver TTL no blockKey, significa que continua bloqueado
+        Long blockTTL = redisTemplate.getExpire(blockKey);
+        if (blockTTL != null && blockTTL > 0) {
             throw new RateLimitException(
-                "Muitas requisições para " + path + " (limite: " + rule.capacity() + ")",
-                ttl,
+                "Muitas requisições para %s (limite: %d). Tente novamente em %d segundos."
+                    .formatted(path, policy.capacity(), blockTTL),
+                blockTTL,
                 path
             );
         }
 
-        // 5) Ainda não estourou: incrementa
-        used++;
-        redisTemplate.opsForValue().set(key, String.valueOf(used));
+        // Caso contrário, inicia um novo ciclo de bloqueio
+        blockCount += 1;
+        long blockSeconds = computeBlockSeconds(policy.refillInterval(), blockCount);
 
-        // 6) Se for a 1ª vez, define TTL = refillInterval
-        if (used == 1) {
-            redisTemplate.expire(key, Duration.ofMinutes(rule.refillInterval()));
-        }
+        // Atualiza Redis com as infos
+        redisTemplate.opsForValue().set(blockKey, String.valueOf(blockCount));
+        redisTemplate.opsForValue().set(countKey, String.valueOf(used));
 
-        // 7) Calcula quantos restam
-        long remaining = rule.capacity() - used;
+        // Define TTL = blockSeconds para ambos
+        redisTemplate.expire(blockKey, Duration.ofSeconds(blockSeconds));
+        redisTemplate.expire(countKey, Duration.ofSeconds(blockSeconds));
 
-        return remaining;
+        throw new RateLimitException(
+            "Muitas requisições para %s (limite: %d). Tente novamente em %d segundos."
+                .formatted(path, policy.capacity(), blockSeconds),
+            blockSeconds,
+            path
+        );
     }
 
     /**
-     * Retorna o tempo (em segundos) até o Redis expirar essa chave (ou 0 se não existir).
+     * Faz o cálculo do tempo de bloqueio exponencial, por ex: 2^(blockCount-1) * refillInterval * 60
      */
-    private long getTimeToResetSeconds(String key) {
-        Long expire = redisTemplate.getExpire(key);
-        if (expire == null || expire < 0) {
-            return 0; // Significa que não tem TTL ou não existe
-        }
-        return expire;
+    private long computeBlockSeconds(int refillIntervalMinutes, long blockCount) {
+        long baseSeconds = refillIntervalMinutes * 60L;
+        return (long) (Math.pow(2, blockCount - 1) * baseSeconds);
     }
 
     /**
-     * Procura a regra correspondente à rota ou retorna a default.
+     * Lê o valor (Long) do Redis, se não existir retorna defaultValue.
      */
-    private RateLimitRule matchRule(String path) {
-        Optional<RateLimitRule> matched = rateLimitProperties.getRoutes().stream()
-                .filter(r -> path.equals(r.path()))
-                .findFirst();
-        return matched.orElse(rateLimitProperties.getDefaultRule());
+    private long getLong(String redisKey, long defaultValue) {
+        String val = redisTemplate.opsForValue().get(redisKey);
+        if (val == null) return defaultValue;
+        return Long.parseLong(val);
     }
 
+    /**
+     * Monta a chave do contador.
+     */
+    private String buildCountKey(String ip, String path) {
+        return "rl:" + ip + ":" + path + ":count";
+    }
+
+    /**
+     * Monta a chave do bloqueio.
+     */
+    private String buildBlockKey(String ip, String path) {
+        return "rl:" + ip + ":" + path + ":block";
+    }
 }
