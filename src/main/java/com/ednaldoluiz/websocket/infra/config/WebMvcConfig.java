@@ -6,7 +6,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.ednaldoluiz.websocket.infra.security.interceptor.RateLimitInterceptor;
+import com.ednaldoluiz.websocket.infra.security.ratelimit.RateLimitInterceptor;
 
 @Configuration
 @RequiredArgsConstructor
