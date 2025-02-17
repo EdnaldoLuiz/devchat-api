@@ -3,7 +3,6 @@ package com.ednaldoluiz.websocket.infra.web.controller.v1.auth;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,16 +15,6 @@ import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.RegisterRespon
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.GeneratePasswordUseCasePort;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.LoginUseCasePort;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.RegisterUserUseCasePort;
-import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
-import com.ednaldoluiz.websocket.infra.web.route.Paths;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,92 +30,19 @@ public class AuthController implements AuthApi {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Endpoint para autenticar um usuário.
-     *
-     * @param request Objeto contendo os dados necessários para a autenticação do usuário.
-     * @return Objeto contendo ID, email, token e refresh token do usuário autenticado.
-     */
-    @PostMapping(Paths.Auth.LOGIN)
-    @Operation(
-        summary = AuthDocs.Login.SUMMARY, 
-        description = AuthDocs.Login.DESCRIPTION
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Usuário autenticado com sucesso.", content = {
-            @Content(
-                mediaType = MediaType.APPLICATION_JSON_VALUE, 
-                schema = @Schema(implementation = RegisterResponse.class),
-                examples = @ExampleObject(value = AuthDocs.Login.STATUS_200_RESPONSE)
-            )
-        }),
-        @ApiResponse(responseCode = "401", description = "Erro de validação no login.", content = {
-            @Content(
-                mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = ErrorResponse.class),
-                examples = @ExampleObject(value = AuthDocs.Login.STATUS_401_RESPONSE)
-            )
-        }),
-    })
-    public ResponseEntity<LoginResponse> login(
-            @Parameter(
-                description = "Dados para autenticar um usuário.", 
-                required = true,
-                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, 
-                schema = @Schema(implementation = LoginRequest.class))
-            ) @RequestBody LoginRequest request
-        ) {
+    @Override
+    public ResponseEntity<LoginResponse> login(LoginRequest request) {
         LoginResponse response = loginPort.login(request);
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Endpoint para gerar uma senha segura automaticamente.
-     *
-     * @return Senha gerada conforme as regras de complexidade definidas.
-     */
-    @GetMapping(Paths.Auth.GENERATE_PASSWORD)
-    @Operation(
-        summary = AuthDocs.GeneratePassword.SUMMARY, 
-        description = AuthDocs.GeneratePassword.DESCRIPTION
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Senha gerada com sucesso.", content = {
-            @Content(
-                mediaType = MediaType.APPLICATION_JSON_VALUE,
-                examples = @ExampleObject(value = AuthDocs.GeneratePassword.STATUS_200_RESPONSE)
-            )
-        })
-    })
+    @Override
     public ResponseEntity<GeneratedPasswordResponse> generateStrongPassword() {
         GeneratedPasswordResponse password = generatePasswordUseCase.generateStrongPassword();
         return ResponseEntity.ok(password);
     }
 
-    /**
-     * Endpoint para realizar o logout de um usuário.
-     *
-     * @return Mensagem de sucesso no logout.
-     */
-    @PostMapping(Paths.Auth.LOGOUT)
-    @Operation(
-        summary = "Realiza o logout do usuário",
-        description = "Invalida o token do usuário atual e remove a sessão ativa."
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Logout realizado com sucesso.", content = {
-            @Content(
-                mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = LogoutResponse.class)
-            )
-        }),
-        @ApiResponse(responseCode = "401", description = "Usuário não autenticado.", content = {
-            @Content(
-                mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = ErrorResponse.class)
-            )
-        })
-    })
+    @Override
     public ResponseEntity<LogoutResponse> logout() {
         return ResponseEntity.ok(LogoutResponse.success());
     }

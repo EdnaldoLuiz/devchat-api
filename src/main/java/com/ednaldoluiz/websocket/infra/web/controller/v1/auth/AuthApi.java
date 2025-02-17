@@ -2,11 +2,16 @@ package com.ednaldoluiz.websocket.infra.web.controller.v1.auth;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.LoginRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.RegisterRequest;
+import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.GeneratedPasswordResponse;
+import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.LoginResponse;
+import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.LogoutResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.RegisterResponse;
 import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
 import com.ednaldoluiz.websocket.infra.web.route.Paths;
@@ -63,4 +68,86 @@ public interface AuthApi {
                 schema = @Schema(implementation = RegisterRequest.class))
         ) @Valid @RequestBody RegisterRequest request
     );
+
+    /**
+     * Endpoint para autenticar um usuário.
+     *
+     * @param request Objeto contendo os dados necessários para a autenticação do usuário.
+     * @return Objeto contendo ID, email, token e refresh token do usuário autenticado.
+     */
+    @PostMapping(Paths.Auth.LOGIN)
+    @Operation(
+        summary = AuthDocs.Login.SUMMARY, 
+        description = AuthDocs.Login.DESCRIPTION
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Usuário autenticado com sucesso.", content = {
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE, 
+                schema = @Schema(implementation = RegisterResponse.class),
+                examples = @ExampleObject(value = AuthDocs.Login.STATUS_200_RESPONSE)
+            )
+        }),
+        @ApiResponse(responseCode = "401", description = "Erro de validação no login.", content = {
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ErrorResponse.class),
+                examples = @ExampleObject(value = AuthDocs.Login.STATUS_401_RESPONSE)
+            )
+        }),
+    })
+    ResponseEntity<LoginResponse> login(@Parameter(
+                description = "Dados para autenticar um usuário.", 
+                required = true,
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, 
+                schema = @Schema(implementation = LoginRequest.class))
+        ) @Valid @RequestBody LoginRequest request
+    );
+
+    /**
+     * Endpoint para gerar uma senha segura automaticamente.
+     *
+     * @return Senha gerada conforme as regras de complexidade definidas.
+     */
+    @GetMapping(Paths.Auth.GENERATE_PASSWORD)
+    @Operation(
+        summary = AuthDocs.GeneratePassword.SUMMARY, 
+        description = AuthDocs.GeneratePassword.DESCRIPTION
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Senha gerada com sucesso.", content = {
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                examples = @ExampleObject(value = AuthDocs.GeneratePassword.STATUS_200_RESPONSE)
+            )
+        })
+    })
+    ResponseEntity<GeneratedPasswordResponse> generateStrongPassword();
+
+    /**
+     * Endpoint para realizar o logout de um usuário.
+     *
+     * @return Mensagem de sucesso no logout.
+     */
+    @PostMapping(Paths.Auth.LOGOUT)
+    @Operation(
+        summary = "Realiza o logout do usuário",
+        description = "Invalida o token do usuário atual e remove a sessão ativa."
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Logout realizado com sucesso.", content = {
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = LogoutResponse.class)
+            )
+        }),
+        @ApiResponse(responseCode = "401", description = "Usuário não autenticado.", content = {
+            @Content(
+                mediaType = MediaType.APPLICATION_JSON_VALUE,
+                schema = @Schema(implementation = ErrorResponse.class)
+            )
+        })
+    })
+    ResponseEntity<LogoutResponse> logout();
+
 }
