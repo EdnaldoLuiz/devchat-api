@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.web.controller.v1;
+package com.ednaldoluiz.websocket.infra.web.controller.v1.auth;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +16,6 @@ import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.RegisterRespon
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.GeneratePasswordUseCasePort;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.LoginUseCasePort;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.RegisterUserUseCasePort;
-import com.ednaldoluiz.websocket.infra.web.docs.AuthDocs;
 import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
 import com.ednaldoluiz.websocket.infra.web.route.Paths;
 
@@ -27,57 +26,17 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping(
-    path = Paths.V1.Auth.AUTH, 
-    produces = MediaType.APPLICATION_JSON_VALUE
-)
-@Tag(name = "Autenticação", description = "Endpoints responsáveis pelo registro e autenticação de usuários.")
 @RequiredArgsConstructor
-public class AuthController {
+public class AuthController implements AuthApi {
 
     private final RegisterUserUseCasePort registerPort;
     private final LoginUseCasePort loginPort;
     private final GeneratePasswordUseCasePort generatePasswordUseCase;
 
-    /**
-     * Endpoint para registrar um novo usuário.
-     *
-     * @param request Objeto contendo os dados necessários para o registro do usuário.
-     * @return Objeto contendo ID, email, token e refresh token do usuário criado.
-     */
-    @PostMapping(Paths.Auth.REGISTER)
-    @Operation(
-        summary = AuthDocs.Register.SUMMARY, 
-        description = AuthDocs.Register.DESCRIPTION
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Usuário registrado com sucesso.", content = {
-            @Content(
-                mediaType = MediaType.APPLICATION_JSON_VALUE, 
-                schema = @Schema(implementation = RegisterResponse.class),
-                examples = @ExampleObject(value = AuthDocs.Register.STATUS_201_RESPONSE)
-            )
-        }),
-        @ApiResponse(responseCode = "400", description = "Erro de validação no registro.", content = {
-            @Content(
-                mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = ErrorResponse.class),
-                examples = @ExampleObject(value = AuthDocs.Register.STATUS_400_RESPONSE)
-            )
-        }),
-    })
-    public ResponseEntity<RegisterResponse> register(
-            @Parameter(
-                description = "Dados para registrar um novo usuário.", 
-                required = true,
-                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, 
-                schema = @Schema(implementation = RegisterRequest.class))
-            ) @Valid @RequestBody RegisterRequest request
-        ) {
+    @Override
+    public ResponseEntity<RegisterResponse> register(RegisterRequest request) {
         RegisterResponse response = registerPort.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -115,7 +74,7 @@ public class AuthController {
                 required = true,
                 content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, 
                 schema = @Schema(implementation = LoginRequest.class))
-            ) @Valid @RequestBody LoginRequest request
+            ) @RequestBody LoginRequest request
         ) {
         LoginResponse response = loginPort.login(request);
         return ResponseEntity.ok(response);

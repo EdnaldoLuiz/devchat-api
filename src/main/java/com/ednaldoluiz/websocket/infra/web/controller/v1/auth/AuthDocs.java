@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.web.docs;
+package com.ednaldoluiz.websocket.infra.web.controller.v1.auth;
 
 /**
  * Documentação dos endpoints de autenticação.
