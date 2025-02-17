@@ -10,10 +10,6 @@ import lombok.RequiredArgsConstructor;
 
 /**
  * Exemplo de Rate Limit usando Redis manualmente, com bloqueio exponencial.
- * 
- * SOLID:
- * - Single Responsibility: só cuida de verificar/atualizar contadores no Redis.
- * - Open/Closed: Se quisermos outro tipo de bloqueio (linear, p.ex.), basta trocar a formula.
  */
 @Service
 @RequiredArgsConstructor
@@ -29,18 +25,14 @@ public class RedisRateLimitService {
      * @return quantas requisições RESTAM.
      */
     public long checkRateLimitAndIncrement(String path, String clientIP) {
-        // 1) Descobre a politica
         RateLimitPolicy policy = rateLimitRouter.resolvePolicy(path);
-
-        // 2) Monta chaves
+        
         String countKey = buildCountKey(clientIP, path);
         String blockKey = buildBlockKey(clientIP, path);
 
-        // 3) Lê contadores do Redis
         long used = getLong(countKey, 0L);
         long blockCount = getLong(blockKey, 0L);
 
-        // 4) Se usou >= capacity, checa se já está bloqueado ou inicia um bloqueio novo
         if (used >= policy.capacity()) {
             return handleBlocked(path, policy, countKey, blockKey, used, blockCount);
         }
@@ -55,7 +47,6 @@ public class RedisRateLimitService {
             redisTemplate.expire(countKey, Duration.ofMinutes(policy.refillInterval()));
         }
 
-        // Calcula quanto resta
         return policy.capacity() - used;
     }
 
@@ -105,25 +96,16 @@ public class RedisRateLimitService {
         return (long) (Math.pow(2, blockCount - 1) * baseSeconds);
     }
 
-    /**
-     * Lê o valor (Long) do Redis, se não existir retorna defaultValue.
-     */
     private long getLong(String redisKey, long defaultValue) {
         String val = redisTemplate.opsForValue().get(redisKey);
         if (val == null) return defaultValue;
         return Long.parseLong(val);
     }
 
-    /**
-     * Monta a chave do contador.
-     */
     private String buildCountKey(String ip, String path) {
         return "rl:" + ip + ":" + path + ":count";
     }
 
-    /**
-     * Monta a chave do bloqueio.
-     */
     private String buildBlockKey(String ip, String path) {
         return "rl:" + ip + ":" + path + ":block";
     }

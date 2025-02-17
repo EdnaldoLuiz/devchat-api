@@ -24,16 +24,13 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         String path = request.getRequestURI();
         String clientIP = getClientIP(request);
 
-        // Tenta consumir 1 request
         long remaining;
         try {
             remaining = redisRateLimitService.checkRateLimitAndIncrement(path, clientIP);
         } catch (RateLimitException e) {
-            // Lança de novo para seu GlobalExceptionHandler capturar
             throw e;
         }
 
-        // Se chegamos aqui, ainda tem requisições no intervalo
         response.addHeader(HEADER_REMAINING, String.valueOf(remaining));
         return true;
     }
