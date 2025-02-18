@@ -63,6 +63,13 @@
             <version>3.4.2</version>
         </dependency>
 
+        <!-- Thymeleaf -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        
         <!-- DB Dependencies -->
 
         <!-- Flyway -->
@@ -124,6 +131,13 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
             <version>0.11.5</version>
+        </dependency>
+
+        <!-- AWS -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>ses</artifactId>
+            <version>2.30.21</version>
         </dependency>
 
         <!-- Passay, para regras de senha -->
