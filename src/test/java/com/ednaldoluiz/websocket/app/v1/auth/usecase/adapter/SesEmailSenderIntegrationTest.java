@@ -4,13 +4,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.ednaldoluiz.websocket.infra.email.SesEmailSender;
+import com.ednaldoluiz.websocket.domain.port.EmailSenderPort;
+
 
 @SpringBootTest
 public class SesEmailSenderIntegrationTest {
 
     @Autowired
-    private SesEmailSender sesEmailSender;
+    private EmailSenderPort sesEmailSender;
 
     @Test
     public void testSendEmail() {
