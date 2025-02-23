@@ -12,7 +12,7 @@ import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
 import com.ednaldoluiz.websocket.infra.security.service.JwtService;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.LoginValidationException;
-
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,6 +26,7 @@ public class LoginUseCaseAdapter implements LoginUseCasePort {
     private final JwtService jwtService;
 
     @Override
+    @RateLimiter(name = "loginRateLimiter")
     public LoginResponse login(LoginRequest request) {
         log.info("Logging in user: {} ........", request.email());
         validators.forEach(validator -> validator.validate(request));
