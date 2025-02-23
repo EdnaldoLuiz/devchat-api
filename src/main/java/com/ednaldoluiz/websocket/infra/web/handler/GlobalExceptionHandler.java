@@ -14,8 +14,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.ednaldoluiz.websocket.infra.web.handler.exception.LoginValidationException;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.PasswordValidationException;
-import com.ednaldoluiz.websocket.infra.web.handler.exception.RateLimitException;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.RegisterValidationException;
+
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,16 +61,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(RateLimitException.class)
+    @ExceptionHandler({RequestNotPermitted.class})
     public ResponseEntity<ErrorResponse> handleRateLimitException(
-            RateLimitException ex, HttpServletRequest request) {
+        RequestNotPermitted ex, HttpServletRequest request) {
 
         ErrorResponse errorResponse = new ErrorResponse(
-                ex.getMessage() + ". Tente novamente em " + ex.getRetryAfterSeconds() + " segundos.",
+                "Erro de limite de requisições",
                 HttpStatus.TOO_MANY_REQUESTS.value(),
-                "Limite de requisições excedido",
-                ex.getPath()
-        );
+                "Muitas requisições. Tente mais tarde.",
+                request.getRequestURI());
 
         return new ResponseEntity<>(errorResponse, HttpStatus.TOO_MANY_REQUESTS);
     }
