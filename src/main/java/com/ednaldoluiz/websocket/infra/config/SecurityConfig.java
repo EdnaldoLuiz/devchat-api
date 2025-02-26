@@ -47,7 +47,9 @@ public class SecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/api/v1/auth/login",
             "/api/v1/auth/register",
-            "/api/v1/auth/generate-password"
+            "/api/v1/auth/generate-password",
+            "/api/v1/auth/forgot-password",
+            "/api/v1/auth/reset-password"
     };
 
     private final CustomUserDetailsService customUserDetailsService;
