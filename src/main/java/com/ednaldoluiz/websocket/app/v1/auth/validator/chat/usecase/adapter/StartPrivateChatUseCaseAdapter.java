@@ -1,8 +1,8 @@
-package com.ednaldoluiz.websocket.app.v1.chat.usecase.adapter;
+package com.ednaldoluiz.websocket.app.v1.auth.validator.chat.usecase.adapter;
 
 import org.springframework.stereotype.Component;
 
-import com.ednaldoluiz.websocket.app.v1.chat.usecase.port.StartPrivateChatUseCasePort;
+import com.ednaldoluiz.websocket.app.v1.auth.validator.chat.usecase.port.StartPrivateChatUseCasePort;
 import com.ednaldoluiz.websocket.domain.model.chat.Chat;
 import com.ednaldoluiz.websocket.domain.model.chat.ChatStatus;
 import com.ednaldoluiz.websocket.domain.model.chat.ChatType;

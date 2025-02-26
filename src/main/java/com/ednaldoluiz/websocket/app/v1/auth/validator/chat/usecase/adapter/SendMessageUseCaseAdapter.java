@@ -1,11 +1,11 @@
-package com.ednaldoluiz.websocket.app.v1.chat.usecase.adapter;
+package com.ednaldoluiz.websocket.app.v1.auth.validator.chat.usecase.adapter;
 
 import java.time.LocalDateTime;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import com.ednaldoluiz.websocket.app.v1.chat.usecase.port.SendMessageUseCasePort;
+import com.ednaldoluiz.websocket.app.v1.auth.validator.chat.usecase.port.SendMessageUseCasePort;
 import com.ednaldoluiz.websocket.domain.model.chat.Chat;
 import com.ednaldoluiz.websocket.domain.model.message.Message;
 import com.ednaldoluiz.websocket.domain.model.message.MessageText;

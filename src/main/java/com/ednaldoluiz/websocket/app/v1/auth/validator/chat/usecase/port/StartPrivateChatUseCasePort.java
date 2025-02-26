@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.app.v1.chat.usecase.port;
+package com.ednaldoluiz.websocket.app.v1.auth.validator.chat.usecase.port;
 
 public interface StartPrivateChatUseCasePort {
 

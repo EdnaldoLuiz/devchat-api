@@ -1,6 +1,8 @@
 package com.ednaldoluiz.websocket.infra.web.handler;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -21,11 +23,14 @@ import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllExceptions(Exception ex, HttpServletRequest request) {
+        log.error("Unhandled exception occurred", ex);
+        
         ErrorResponse errorResponse = new ErrorResponse(
                 "Internal Server Error",
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),

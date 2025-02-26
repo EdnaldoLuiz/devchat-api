@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.RegisterResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.RegisterUserUseCasePort;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;

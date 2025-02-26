@@ -1,6 +1,9 @@
 package com.ednaldoluiz.websocket.infra.email;
 
 import com.ednaldoluiz.websocket.domain.port.EmailSenderPort;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -9,6 +12,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.ses.SesClient;
 import software.amazon.awssdk.services.ses.model.*;
 
+@Slf4j
 @Component
 public class AwsSesEmailSenderAdapter implements EmailSenderPort {
 
@@ -24,24 +28,16 @@ public class AwsSesEmailSenderAdapter implements EmailSenderPort {
     ) {
         this.sesClient = SesClient.builder()
             .region(Region.of(region))
-            .endpointOverride(java.net.URI.create(endpoint))
             .credentialsProvider(
                 StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey))
             )
             .build();
-
-        // Opcional: verificar e-mail (apenas se estiver usando LocalStack ou quiser forçar verificação).
-        sesClient.verifyEmailIdentity(VerifyEmailIdentityRequest.builder()
-            .emailAddress(defaultSender)
-            .build());
-
         this.defaultSender = defaultSender;
     }
 
     @Override
     public void sendEmail(String from, String to, String subject, String htmlBody) {
-        // Se preferir forçar o "from" como defaultSender, basta usar defaultSender aqui.
-        String actualFrom = (from != null) ? from : defaultSender;
+        log.info("Enviando e-mail de {} para {} com assunto: {}", from, to, subject);
 
         Destination destination = Destination.builder()
             .toAddresses(to)
@@ -67,14 +63,14 @@ public class AwsSesEmailSenderAdapter implements EmailSenderPort {
         SendEmailRequest emailRequest = SendEmailRequest.builder()
             .destination(destination)
             .message(message)
-            .source(actualFrom)
+            .source(defaultSender)
             .build();
 
         try {
             sesClient.sendEmail(emailRequest);
+            log.info("E-mail enviado com sucesso!");
         } catch (SesException e) {
-            throw new RuntimeException("Falha ao enviar e-mail via SES: "
-                + e.awsErrorDetails().errorMessage(), e);
+            throw new RuntimeException("Falha ao enviar e-mail via SES: " + e.awsErrorDetails().errorMessage(), e);
         }
     }
 }
