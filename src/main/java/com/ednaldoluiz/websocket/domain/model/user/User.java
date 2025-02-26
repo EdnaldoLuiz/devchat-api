@@ -64,6 +64,9 @@ public class User extends TimestampedEntityBase implements UserDetails {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<UsersRooms> userRooms;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PasswordResetToken> passwordResetTokens;
+
     public User(SnowflakeIdGenerator idGenerator) {
         super(idGenerator);
     }
