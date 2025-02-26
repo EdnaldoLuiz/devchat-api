@@ -1,72 +1,86 @@
 package com.ednaldoluiz.websocket.app.v1.auth.usecase.adapter;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
+import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.ResetPasswordRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.PasswordResetUseCasePort;
+import com.ednaldoluiz.websocket.domain.model.user.PasswordResetToken;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.domain.port.EmailSenderPort;
+import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
-
-import lombok.RequiredArgsConstructor;
+import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 @Component
 @RequiredArgsConstructor
 public class PasswordResetUseCaseAdapter implements PasswordResetUseCasePort {
 
     private final EmailSenderPort emailSender;
-    //private final PasswordResetTokenRepository tokenRepository;
+    private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-
-    // Construtor ...
+    private final SnowflakeIdGenerator snowflakeId;
 
     @Override
-    public void sendPasswordResetEmail(String recipientEmail, String resetToken) {
-        // User user = userRepository.findByEmail(recipientEmail)
-        //     .orElseThrow(() -> new IllegalArgumentException("User not found."));
+    @Transactional
+    public void sendPasswordResetEmail(String recipientEmail) {
 
-        // // Gera token
-        // String tokenValue = UUID.randomUUID().toString();
-        // Instant expires = Instant.now().plus(30, ChronoUnit.MINUTES);
+        userRepository.findByEmail(recipientEmail)
+                .ifPresent(user -> {
+                    String tokenValue = UUID.randomUUID().toString();
+                    Instant expires = Instant.now().plus(30, ChronoUnit.MINUTES);
 
-        // // Salva o token
-        // PasswordResetToken token = new PasswordResetToken(tokenValue, user.getId(), expires);
-        // tokenRepository.save(token);
+                    PasswordResetToken tokenEntity = new PasswordResetToken(
+                            snowflakeId, user, tokenValue, expires
+                    );
 
-        // // Monta link
-        // String resetLink = "http://localhost:8080/reset-password?token=" + tokenValue;
+                    tokenRepository.save(tokenEntity);
 
-        // // Monta email (pode usar template etc.)
-        // String subject = "Recuperação de senha";
-        // String bodyHtml = """
-        //     <p>Olá, clique no link abaixo para redefinir sua senha. Este link expira em 30 minutos:</p>
-        //     <p><a href="%s">Redefinir senha</a></p>
-        // """.formatted(resetLink);
+                    String encodedToken = URLEncoder.encode(tokenValue, StandardCharsets.UTF_8);
+                    String resetLink = "http://localhost:3000/reset-password?token=" + encodedToken;
+                    String subject = "Recuperação de senha";
+                    String bodyHtml = "<p>Olá, clique no link abaixo para redefinir sua senha. Ele expira em 30 minutos:</p>\n"
+                            + "<p><a href=\"" + resetLink + "\">Redefinir senha</a></p>"
+                            + "<p>Se o link acima não funcionar, copie e cole este URL no seu navegador:</p>"
+                            + "<p>" + resetLink + "</p>";
 
-        // emailSender.sendHtmlEmail(null, recipientEmail, subject, bodyHtml);
+                    emailSender.sendEmail(null, recipientEmail, subject, bodyHtml);
+                });
     }
 
     @Override
-    public void resetPassword(String tokenValue, String newPassword) {
-        // PasswordResetToken token = tokenRepository.findByToken(tokenValue)
-        //     .orElseThrow(() -> new IllegalArgumentException("Token inválido"));
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
 
-        // if (token.isExpired()) {
-        //     throw new IllegalStateException("Token expirado");
-        // }
+        PasswordResetToken token = tokenRepository.findByToken(request.token())
+                .orElseThrow(() -> new IllegalArgumentException("Token inválido"));
 
-        // User user = userRepository.findById(token.getUserId())
-        //     .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+        if (token.getExpiresAt().isBefore(Instant.now())) {
+            throw new IllegalStateException("Token expirado");
+        }
 
-        // user.setPassword(passwordEncoder.encode(newPassword));
-        // userRepository.save(user);
+        if (token.isUsed()) {
+            throw new IllegalStateException("Token já utilizado");
+        }
 
-        // // Pode invalidar o token
-        // tokenRepository.delete(token);
+        if (!request.password().equals(request.confirmPassword())) {
+            throw new IllegalArgumentException("Senhas não conferem");
+        }
+
+        User user = userRepository.findById(token.getUser().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        user.setPassword(passwordEncoder.encode(request.password()).toCharArray());
+        userRepository.save(user);
+        tokenRepository.delete(token);
     }
 }

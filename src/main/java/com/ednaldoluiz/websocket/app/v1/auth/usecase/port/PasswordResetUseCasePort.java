@@ -1,9 +1,11 @@
 package com.ednaldoluiz.websocket.app.v1.auth.usecase.port;
 
+import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.ResetPasswordRequest;
+
 public interface PasswordResetUseCasePort {
 
-    void sendPasswordResetEmail(String recipientEmail, String resetToken);
+    void sendPasswordResetEmail(String recipientEmail);
 
-    void resetPassword(String tokenValue, String newPassword);
+    void resetPassword(ResetPasswordRequest request);
     
 }
