@@ -237,4 +237,40 @@ public interface AuthDocs {
             }
         """;
     }
+
+    interface ForgotPassword {
+        String SUMMARY = "Recuperação de Senha";
+        String DESCRIPTION = """
+            <html>
+                <body>
+                    <h3>Recuperação de Senha</h3>
+                    <p>Este endpoint permite que um usuário solicite a redefinição de senha. Se o email existir, um email será enviado com um link para redefinir a senha.</p>
+                </body>
+            </html>
+            """;
+
+        String STATUS_200_RESPONSE = """
+            {
+                "message": "Email de redefinição enviado se usuário existir"
+            }
+        """;
+    }
+
+    interface ResetPassword {
+        String SUMMARY = "Redefinição de Senha";
+        String DESCRIPTION = """
+            <html>
+                <body>
+                    <h3>Redefinição de Senha</h3>
+                    <p>Este endpoint permite que um usuário redefina sua senha após receber um token de redefinição.</p>
+                </body>
+            </html>
+            """;
+
+        String STATUS_200_RESPONSE = """
+            {
+                "message": "Senha redefinida com sucesso"
+            }
+        """;
+    }
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.LoginRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.RegisterRequest;
+import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.ResetPasswordRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.GeneratedPasswordResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.LoginResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.LogoutResponse;
@@ -16,6 +17,7 @@ import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.GeneratePasswordUseCas
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.LoginUseCasePort;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.PasswordResetUseCasePort;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.RegisterUserUseCasePort;
+import com.ednaldoluiz.websocket.infra.web.controller.common.GenericApiResponse;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +25,7 @@ public class AuthController implements AuthApi {
 
     private final RegisterUserUseCasePort registerPort;
     private final LoginUseCasePort loginPort;
-    private final GeneratePasswordUseCasePort generatePasswordUseCase;
+    private final GeneratePasswordUseCasePort generatePasswordUseCasePort;
     private final PasswordResetUseCasePort passwordResetUseCasePort;
 
     @Override
@@ -40,7 +42,7 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<GeneratedPasswordResponse> generateStrongPassword() {
-        GeneratedPasswordResponse password = generatePasswordUseCase.generateStrongPassword();
+        GeneratedPasswordResponse password = generatePasswordUseCasePort.generateStrongPassword();
         return ResponseEntity.ok(password);
     }
 
@@ -49,9 +51,15 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok(LogoutResponse.success());
     }
 
-    @PostMapping
-    public ResponseEntity<String> testEmail(@RequestParam String email, @RequestParam String token) {
-        passwordResetUseCasePort.sendPasswordResetEmail(email, token);
-        return ResponseEntity.ok("E-mail de teste enviado para " + email);
+    @Override
+    public ResponseEntity<GenericApiResponse> forgotPassword(String email) {
+        passwordResetUseCasePort.sendPasswordResetEmail(email);
+        return ResponseEntity.ok(new GenericApiResponse("E-mail de redefinição de senha enviado com sucesso"));
+    }
+
+    @Override
+    public ResponseEntity<GenericApiResponse> resetPassword(ResetPasswordRequest request) {
+        passwordResetUseCasePort.resetPassword(request);
+        return ResponseEntity.ok(new GenericApiResponse("Senha redefinida com sucesso"));
     }
 }

@@ -6,13 +6,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.LoginRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.RegisterRequest;
+import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.ResetPasswordRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.GeneratedPasswordResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.LoginResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.LogoutResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.RegisterResponse;
+import com.ednaldoluiz.websocket.infra.web.controller.common.GenericApiResponse;
 import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
 import com.ednaldoluiz.websocket.infra.web.route.Paths;
 
@@ -149,5 +152,33 @@ public interface AuthApi {
         })
     })
     ResponseEntity<LogoutResponse> logout();
+
+    /**
+     * Endpoint para solicitar a redefinição de senha.
+     *
+     * @param email Email do usuário que deseja redefinir a senha.
+     * @return Mensagem de sucesso ao enviar o email de redefinição.
+     */
+    @PostMapping(Paths.Auth.FORGOT_PASSWORD)
+    @Operation(summary = AuthDocs.ForgotPassword.SUMMARY, description = AuthDocs.ForgotPassword.DESCRIPTION)
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Se o email existir, um email de redefinição será enviado."),
+        @ApiResponse(responseCode = "400", description = "Erro ao processar solicitação."),
+    })
+    ResponseEntity<GenericApiResponse> forgotPassword(@RequestParam String email);
+
+    /**
+     * Endpoint para redefinir a senha de um usuário.
+     *
+     * @param request Objeto contendo os dados necessários para redefinir a senha do usuário.
+     * @return Mensagem de sucesso ao redefinir a senha.
+     */
+    @PostMapping(Paths.Auth.RESET_PASSWORD)
+    @Operation(summary = AuthDocs.ResetPassword.SUMMARY, description = AuthDocs.ResetPassword.DESCRIPTION)
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Senha redefinida com sucesso."),
+        @ApiResponse(responseCode = "400", description = "Erro ao redefinir senha."),
+    })
+    ResponseEntity<GenericApiResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request);
 
 }

@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ednaldoluiz.websocket.app.v1.chat.usecase.port.SendMessageUseCasePort;
-import com.ednaldoluiz.websocket.app.v1.chat.usecase.port.StartPrivateChatUseCasePort;
+import com.ednaldoluiz.websocket.app.v1.auth.validator.chat.usecase.port.SendMessageUseCasePort;
+import com.ednaldoluiz.websocket.app.v1.auth.validator.chat.usecase.port.StartPrivateChatUseCasePort;
 
 import lombok.RequiredArgsConstructor;
 

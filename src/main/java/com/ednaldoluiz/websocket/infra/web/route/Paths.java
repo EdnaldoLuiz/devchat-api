@@ -18,5 +18,7 @@ public interface Paths {
         String REGISTER = "/register";
         String GENERATE_PASSWORD = "/generate-password";
         String LOGOUT = "/logout";
+        String FORGOT_PASSWORD = "/forgot-password";
+        String RESET_PASSWORD = "/reset-password";
     }
 }
