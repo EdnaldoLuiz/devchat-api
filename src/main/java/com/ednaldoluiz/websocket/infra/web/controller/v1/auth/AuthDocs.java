@@ -23,11 +23,11 @@ public interface AuthDocs {
                     <table cellpadding="5" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Campo</th>
-                                <th>Validado por</th>
-                                <th>Descrição</th>
-                                <th>Exemplo</th>
-                                <th>Regras de Validação</th>
+                                <th width="10%">Campo</th>
+                                <th width="25%">Validado por</th>
+                                <th width="20%">Descrição</th>
+                                <th width="15%">Exemplo</th>
+                                <th width="30%">Regras de Validação</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,11 +120,11 @@ public interface AuthDocs {
                     <table cellpadding="5" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Campo</th>
-                                <th>Validado por</th>
-                                <th>Descrição</th>
-                                <th>Exemplo</th>
-                                <th>Regras de Validação</th>
+                                <th width="10%">Campo</th>
+                                <th width="25%">Validado por</th>
+                                <th width="20%">Descrição</th>
+                                <th width="15%">Exemplo</th>
+                                <th width="30%">Regras de Validação</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -256,16 +256,56 @@ public interface AuthDocs {
         """;
     }
 
-    interface ResetPassword {
+    public interface ResetPassword {
         String SUMMARY = "Redefinição de Senha";
+        
         String DESCRIPTION = """
             <html>
                 <body>
-                    <h3>Redefinição de Senha</h3>
+                    <h3>Detalhes do ResetPasswordRequest</h3>
                     <p>Este endpoint permite que um usuário redefina sua senha após receber um token de redefinição.</p>
+                    <table cellpadding="5" cellspacing="0">
+                        <thead>
+                            <th width="10%">Campo</th>
+                            <th width="25%">Validado por</th>
+                            <th width="25%">Descrição</th>
+                            <th width="20%">Exemplo</th>
+                            <th width="20%">Regras de Validação</th>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>key</strong></td>
+                                <td>`@NotBlank`</td>
+                                <td>Chave única associada à solicitação de redefinição.</td>
+                                <td>c7b3b3b3-4b3b-4b3b-4b3b-4b3b3b3b3b3b</td>
+                                <td>Não pode estar em branco. Deve ser um UUID válido.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>token</strong></td>
+                                <td>`@NotBlank`</td>
+                                <td>Token de autenticação temporário para a redefinição.</td>
+                                <td>f3d3a3a3-4d4d-4d4d-8e3d-4b3b3b3b3b3b</td>
+                                <td>Não pode estar em branco. Deve ser um UUID válido.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>password</strong></td>
+                                <td>`@NotBlank`, `@Size(min=8, max=20)`</td>
+                                <td>Nova senha do usuário.</td>
+                                <td>SenhaForte123!</td>
+                                <td>Deve ter entre 8 e 20 caracteres, conter ao menos 1 minúscula, 1 maiúscula, 1 número e 1 caractere especial.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>confirmPassword</strong></td>
+                                <td>`@NotBlank`, `@Size(min=8, max=20)`</td>
+                                <td>Confirmação da nova senha.</td>
+                                <td>SenhaForte123!</td>
+                                <td>Deve ter entre 8 e 20 caracteres e ser idêntico ao campo `password`.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </body>
             </html>
-            """;
+            """;    
 
         String STATUS_200_RESPONSE = """
             {
