@@ -1,6 +1,6 @@
 package com.ednaldoluiz.websocket.domain.port;
 
-public interface EmailSenderPort {
+public interface EmailPort {
 
     void sendEmail(String from, String to, String subject, String bodyHtml);
     
