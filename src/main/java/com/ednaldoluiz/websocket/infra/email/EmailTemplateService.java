@@ -1,5 +1,7 @@
 package com.ednaldoluiz.websocket.infra.email;
 
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -13,9 +15,13 @@ public class EmailTemplateService {
         this.templateEngine = templateEngine;
     }
 
-    public String buildPasswordResetEmail(String resetLink) {
+    public String buildPasswordResetEmail(String resetLink, String userName) {
         Context context = new Context();
         context.setVariable("resetLink", resetLink);
+        context.setVariables(Map.of(
+            "resetLink", resetLink,
+            "userName", userName
+        ));
         return templateEngine.process("password-reset.html", context);
     }
 }
