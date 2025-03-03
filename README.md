@@ -87,6 +87,7 @@
             <th><img src="https://icon.icepanel.io/AWS/svg/Compute/EC2.svg" width=100px height=100px/></th>
 	    <td><img src="https://icon.icepanel.io/AWS/svg/Database/Aurora.svg" width=100px height=100px/></td>
 	    <td><img src="https://icon.icepanel.io/AWS/svg/Database/ElastiCache.svg" width=100px height=100px/></td>
+	    <td><img src="https://icon.icepanel.io/AWS/svg/Networking-Content-Delivery/Virtual-Private-Cloud.svg" width=100px height=100px/></td>
         </tr>
     </thead>
     <tbody align="center">
@@ -96,6 +97,7 @@
             <td>EC2</td>
 	    <td>Aurora v2</td>
 	    <td>Elastic Cache</td>
+	    <td>VPC</td>
         </tr>
     </tbody>
 </table>
