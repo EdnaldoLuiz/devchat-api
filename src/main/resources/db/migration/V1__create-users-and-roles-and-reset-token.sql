@@ -1,0 +1,34 @@
+CREATE TABLE users (
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(70) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    deleted BOOLEAN DEFAULT FALSE,
+    phone VARCHAR(20) UNIQUE NOT NULL,
+    avatar VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CHECK (CHAR_LENGTH(name) >= 3),
+    CHECK (phone REGEXP '^[0-9]+$')
+) ENGINE=InnoDB;
+
+CREATE TABLE user_roles (
+    user_id BIGINT NOT NULL,
+    role ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
+    CONSTRAINT fk_user_roles FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    UNIQUE (user_id, role) -- Impede duplicação de roles para o mesmo usuário
+) ENGINE=InnoDB;
+
+CREATE TABLE password_reset_tokens (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    key_id VARCHAR(36) NOT NULL,
+    hashed_token VARCHAR(60) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE(key_id),
+    CHECK (CHAR_LENGTH(key_id) = 36),
+    CHECK (CHAR_LENGTH(hashed_token) = 60)
+) ENGINE=InnoDB;

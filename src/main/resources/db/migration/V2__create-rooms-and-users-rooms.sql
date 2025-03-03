@@ -1,26 +1,3 @@
--- Criação da tabela users
-CREATE TABLE users (
-    id BIGINT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    email VARCHAR(70) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    deleted BOOLEAN DEFAULT FALSE,
-    phone VARCHAR(20) UNIQUE NOT NULL,
-    avatar VARCHAR(255) DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CHECK (CHAR_LENGTH(name) >= 3),
-    CHECK (phone REGEXP '^[0-9]+$')
-) ENGINE=InnoDB;
-
-CREATE TABLE user_roles (
-    user_id BIGINT NOT NULL,
-    role ENUM('ADMIN', 'USER') NOT NULL DEFAULT 'USER',
-    CONSTRAINT fk_user_roles FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-    UNIQUE (user_id, role) -- Impede duplicação de roles para o mesmo usuário
-) ENGINE=InnoDB;
-
--- Criação da tabela rooms
 CREATE TABLE rooms (
     id BIGINT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
@@ -34,7 +11,6 @@ CREATE TABLE rooms (
     CHECK (CHAR_LENGTH(name) >= 3)
 ) ENGINE=InnoDB;
 
--- Criação da tabela users_rooms
 CREATE TABLE users_rooms (
     id BIGINT PRIMARY KEY,
     user_id BIGINT NOT NULL,
