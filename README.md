@@ -84,20 +84,14 @@
         <tr>
             <th><img src="https://icon.icepanel.io/AWS/svg/Storage/Simple-Storage-Service.svg" width=100px height=100px/></th>
             <th><img src="https://icon.icepanel.io/AWS/svg/Business-Applications/Simple-Email-Service.svg" width=100px height=100px/></th>
-            <th><img src="https://icon.icepanel.io/AWS/svg/Compute/EC2.svg" width=100px height=100px/></th>
-	    <td><img src="https://icon.icepanel.io/AWS/svg/Database/Aurora.svg" width=100px height=100px/></td>
-	    <td><img src="https://icon.icepanel.io/AWS/svg/Database/ElastiCache.svg" width=100px height=100px/></td>
-	    <td><img src="https://icon.icepanel.io/AWS/svg/Networking-Content-Delivery/Virtual-Private-Cloud.svg" width=100px height=100px/></td>
+            <th><img src="https://icon.icepanel.io/AWS/svg/Management-Governance/CloudWatch.svg" width=100px height=100px/></th>
         </tr>
     </thead>
     <tbody align="center">
         <tr>
             <td>S3</td>
             <td>SES</td>
-            <td>EC2</td>
-	    <td>Aurora v2</td>
-	    <td>Elastic Cache</td>
-	    <td>VPC</td>
+            <td>CloudWatch</td>
         </tr>
     </tbody>
 </table>
