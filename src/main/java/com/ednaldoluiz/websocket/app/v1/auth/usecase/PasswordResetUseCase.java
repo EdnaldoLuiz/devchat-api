@@ -1,0 +1,58 @@
+package com.ednaldoluiz.websocket.app.v1.auth.usecase;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import com.ednaldoluiz.websocket.app.v1.auth.dto.request.ResetPasswordRequest;
+import com.ednaldoluiz.websocket.domain.model.user.PasswordResetToken;
+import com.ednaldoluiz.websocket.domain.model.user.User;
+import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
+import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
+import com.ednaldoluiz.websocket.infra.web.handler.exception.PasswordValidationException;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class PasswordResetUseCase {
+
+    private final PasswordResetTokenRepository tokenRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+
+    @Transactional
+    public void execute(ResetPasswordRequest request) {
+        log.info("Redefinindo senha para algum usuário.");
+        // Buscar o token pelo "k" (keyId)
+        PasswordResetToken resetToken = tokenRepository.findByKeyId(request.key())
+            .orElseThrow(() -> new PasswordValidationException("Token inválido ou expirado."));
+
+        // Verifica se está expirado ou já foi usado
+        if (resetToken.isExpired()) {
+            throw new PasswordValidationException("Token expirado ou já utilizado.");
+        }
+
+        // Valida se o token fornecido (`t`) corresponde ao hash armazenado
+        if (!passwordEncoder.matches(request.token(), resetToken.getHashedToken())) {
+            throw new PasswordValidationException("Token inválido.");
+        }
+
+        // Valida se as senhas são idênticas
+        if (!request.password().equals(request.confirmPassword())) {
+            throw new PasswordValidationException("Senhas não conferem.");
+        }
+
+        // Buscar usuário e redefinir a senha
+        User user = userRepository.findById(resetToken.getUser().getId())
+            .orElseThrow(() -> new PasswordValidationException("Usuário não encontrado."));
+
+        user.setPassword(passwordEncoder.encode(request.password()).toCharArray());
+        userRepository.save(user);
+
+        resetToken.markAsUsed();
+        tokenRepository.save(resetToken);
+        log.info("Senha redefinida com sucesso para o usuário: {}", user.getEmail());
+    }
+}

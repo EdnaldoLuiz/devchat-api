@@ -1,13 +1,11 @@
-package com.ednaldoluiz.websocket.app.v1.auth.usecase.adapter;
+package com.ednaldoluiz.websocket.app.v1.auth.usecase;
 
-import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.RegisterRequest;
-import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.RegisterResponse;
-import com.ednaldoluiz.websocket.app.v1.auth.usecase.port.RegisterUserUseCasePort;
-import com.ednaldoluiz.websocket.app.v1.auth.validator.RegisterValidator;
+import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
+import com.ednaldoluiz.websocket.app.v1.auth.dto.response.RegisterResponse;
+import com.ednaldoluiz.websocket.app.v1.auth.validator.AuthValidator;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
 import com.ednaldoluiz.websocket.infra.security.service.JwtService;
-import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,21 +18,19 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RegisterUserUseCaseAdapter implements RegisterUserUseCasePort {
+public class RegisterUseCase {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final SnowflakeIdGenerator idGenerator;
-    private final List<RegisterValidator> validators;
+    private final List<AuthValidator<RegisterRequest>> validators;
 
-    @Override
-    public RegisterResponse register(RegisterRequest request) {
+    public RegisterResponse execute(RegisterRequest request) {
         log.info("Registering user: {} ........", request.email());
         validators.forEach(validator -> validator.validate(request));
 
         String hashedPassword = passwordEncoder.encode(request.password());
-        User user = new User(idGenerator, request.email(), hashedPassword, request.name(), request.phone());
+        User user = new User(request.email(), hashedPassword, request.name(), request.phone());
 
         userRepository.save(user);
         user.clearPassword();
