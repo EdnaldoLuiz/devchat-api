@@ -1,6 +1,7 @@
-package com.ednaldoluiz.websocket.app.v1.auth.validator;
+package com.ednaldoluiz.websocket.app.v1.auth.validator.chain;
 
-import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.RegisterRequest;
+import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
+import com.ednaldoluiz.websocket.app.v1.auth.validator.AuthValidator;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.RegisterValidationException;
 
@@ -14,13 +15,13 @@ import org.springframework.stereotype.Component;
 @Order(3)
 @Component
 @RequiredArgsConstructor
-public class PhoneExistsValidator implements RegisterValidator {
+public class PhoneExistsValidator implements AuthValidator<RegisterRequest> {
 
     private final UserRepository userRepository;
 
     @Override
     public void validate(RegisterRequest request) {
-        log.info("Validando o telefone do request: " + request.phone());
+        log.info("Validando o telefone do request: {}", request.phone());
         if (userRepository.existsByPhone(request.phone())) {
             throw new RegisterValidationException("Já existe um usuário com este telefone.");
         }

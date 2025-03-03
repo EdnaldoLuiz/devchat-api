@@ -1,9 +1,10 @@
-package com.ednaldoluiz.websocket.app.v1.auth.validator;
+package com.ednaldoluiz.websocket.app.v1.auth.validator.chain;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.request.RegisterRequest;
+import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
+import com.ednaldoluiz.websocket.app.v1.auth.validator.AuthValidator;
 import com.ednaldoluiz.websocket.infra.security.policy.PasswordPolicy;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.PasswordValidationException;
 
@@ -14,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Order(1)
 @Component
 @RequiredArgsConstructor
-public class PasswordValidator implements RegisterValidator {
+public class PasswordValidator implements AuthValidator<RegisterRequest> {
 
     private final PasswordPolicy passwordPolicy;
 
