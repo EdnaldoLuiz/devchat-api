@@ -22,6 +22,6 @@ public interface PasswordResetTokenRepository extends BaseRepository<PasswordRes
     """)
     int deleteExpiredUnusedTokens(Instant now);
     
-    Optional<PasswordResetToken> findByToken(String tokenValue);
+    Optional<PasswordResetToken> findByKeyId(String key);
 
 }
