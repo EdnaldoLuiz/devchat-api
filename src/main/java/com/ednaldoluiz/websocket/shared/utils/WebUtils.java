@@ -1,11 +1,9 @@
-package com.ednaldoluiz.websocket.domain.service;
+package com.ednaldoluiz.websocket.shared.utils;
 
 import com.ednaldoluiz.websocket.domain.model.user.UserAgentInfo;
 import eu.bitwalker.useragentutils.UserAgent;
-import org.springframework.stereotype.Service;
 
-@Service
-public class UserAgentExtractorService {
+public class WebUtils {
 
     /**
      * Extrai informações do User Agent a partir de uma string.
