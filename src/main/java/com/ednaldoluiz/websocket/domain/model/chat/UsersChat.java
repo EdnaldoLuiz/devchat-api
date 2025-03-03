@@ -2,7 +2,6 @@ package com.ednaldoluiz.websocket.domain.model.chat;
 
 import com.ednaldoluiz.websocket.domain.model.base.TimestampedEntityBase;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -60,7 +59,14 @@ public class UsersChat extends TimestampedEntityBase {
         super();
     }
 
-    public UsersChat(SnowflakeIdGenerator idGenerator) {
-        super(idGenerator);
+    public void block() {
+        this.status = ChatStatus.BLOCKED;
+    }
+
+    public void archive() {
+        if (this.status == ChatStatus.BLOCKED) {
+            throw new IllegalStateException("Cannot archive a blocked chat");
+        }
+        this.status = ChatStatus.ARCHIVED;
     }
 }

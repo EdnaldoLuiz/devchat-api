@@ -3,7 +3,7 @@ package com.ednaldoluiz.websocket.domain.model.room;
 import java.util.Set;
 
 import com.ednaldoluiz.websocket.domain.model.base.AuditableEntityBase;
-import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
+import com.ednaldoluiz.websocket.domain.model.user.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,7 +34,10 @@ public class Room extends AuditableEntityBase {
     @OneToMany(mappedBy = "room", fetch = FetchType.LAZY)
     private Set<UsersRooms> userRooms;
 
-    public Room(SnowflakeIdGenerator idGenerator) {
-        super(idGenerator);
+    public void addUser(User user, RoomRole role) {
+        UsersRooms usersRooms = new UsersRooms(
+            this, user, role
+        );
+        userRooms.add(usersRooms);
     }
 }

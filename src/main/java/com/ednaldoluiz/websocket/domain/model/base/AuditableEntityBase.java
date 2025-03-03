@@ -4,8 +4,6 @@ import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
@@ -33,7 +31,4 @@ public abstract class AuditableEntityBase extends TimestampedEntityBase {
     @Column(name = "updated_by", nullable = false)
     private Long updatedBy;
 
-    public AuditableEntityBase(SnowflakeIdGenerator idGenerator) {
-        super(idGenerator);
-    }
 }

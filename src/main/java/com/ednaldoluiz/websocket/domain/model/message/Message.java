@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
 import com.ednaldoluiz.websocket.domain.model.chat.Chat;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -56,12 +55,6 @@ public class Message extends EntityBase {
     public Message() {
         this.deleted = false;
     }
-
-    public Message(SnowflakeIdGenerator idGenerator) {
-        super(idGenerator);
-        this.deleted = false;
-    }
-
     // public Message(SendMessageRequest request, User user, Chat chat) {
     //     this.messageText = new MessageText(request.message());
     //     this.chat = chat;

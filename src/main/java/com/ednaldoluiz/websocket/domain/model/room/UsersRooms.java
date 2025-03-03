@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -72,7 +71,10 @@ public class UsersRooms extends EntityBase {
     @Column(name = "joined_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime joinedAt;
 
-    public UsersRooms(SnowflakeIdGenerator idGenerator) {
-        this.id = idGenerator.generateId();
+    public UsersRooms(Room room, User user, RoomRole role) {
+        this.room = room;
+        this.user = user;
+        this.role = role;
+        this.joinedAt = LocalDateTime.now();
     }
 }

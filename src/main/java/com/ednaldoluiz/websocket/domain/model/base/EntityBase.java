@@ -2,8 +2,9 @@ package com.ednaldoluiz.websocket.domain.model.base;
 
 import java.io.Serializable;
 
-import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
+import com.ednaldoluiz.websocket.shared.generator.CustomTsidGenerator;
 
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -23,12 +24,9 @@ import lombok.Setter;
 public abstract class EntityBase implements Serializable {
 
     @Id
+    @Tsid(CustomTsidGenerator.class)
     private Long id;
 
-    protected EntityBase(SnowflakeIdGenerator idGenerator) {
-        this.id = idGenerator.generateId();
-    }
-
     protected EntityBase() {}
-    
+
 }

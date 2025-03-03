@@ -53,4 +53,8 @@ public class MessageStatus extends EntityBase {
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 
+    public void markRead() {
+        this.status = MessageStatusType.READ;
+        this.timestamp = LocalDateTime.now();
+    }
 }

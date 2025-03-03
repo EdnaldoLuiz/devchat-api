@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
-import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 import jakarta.persistence.*;
 
@@ -41,7 +40,4 @@ public class MessageAttachments extends EntityBase {
     @Column(name = "attachment_data", columnDefinition = "MEDIUMBLOB")
     private byte[] attachmentData;
 
-    public MessageAttachments(SnowflakeIdGenerator idGenerator) {
-        super(idGenerator);
-    }
 }

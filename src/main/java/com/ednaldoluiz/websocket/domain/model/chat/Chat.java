@@ -1,7 +1,6 @@
 package com.ednaldoluiz.websocket.domain.model.chat;
 
 import com.ednaldoluiz.websocket.domain.model.base.TimestampedEntityBase;
-import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,9 +29,5 @@ public class Chat extends TimestampedEntityBase {
 
     public Chat() {
         super();
-    }
-
-    public Chat(SnowflakeIdGenerator idGenerator) {
-        super(idGenerator);
     }
 }
