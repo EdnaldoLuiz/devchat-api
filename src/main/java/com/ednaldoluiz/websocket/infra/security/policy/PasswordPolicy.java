@@ -1,6 +1,6 @@
 package com.ednaldoluiz.websocket.infra.security.policy;
 
-import com.ednaldoluiz.websocket.app.v1.auth.usecase.dto.response.GeneratedPasswordResponse;
+import com.ednaldoluiz.websocket.app.v1.auth.dto.response.GeneratedPasswordResponse;
 import com.ednaldoluiz.websocket.infra.web.handler.FieldErrorResponse;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.PasswordValidationException;
 import org.passay.*;
