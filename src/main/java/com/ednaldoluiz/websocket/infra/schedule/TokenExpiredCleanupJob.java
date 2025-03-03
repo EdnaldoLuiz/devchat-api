@@ -18,7 +18,7 @@ public class TokenExpiredCleanupJob {
     private final PasswordResetTokenRepository tokenRepository;
     private static final int ONE_HOUR = 3600000;
 
-    @Scheduled(fixedRate = ONE_HOUR)
+    @Scheduled(fixedDelay = ONE_HOUR)
     public void cleanExpiredTokens() {
         log.info("Iniciando limpeza de tokens expirados...");
         int deletedCount = tokenRepository.deleteExpiredUnusedTokens(Instant.now());
