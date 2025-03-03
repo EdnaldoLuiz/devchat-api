@@ -3,7 +3,6 @@ package com.ednaldoluiz.websocket.domain.model.user;
 import java.time.Instant;
 
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
-import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,8 +23,11 @@ public class PasswordResetToken extends EntityBase {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name="token", nullable = false, unique = true, length = 64)
-    private String token;
+    @Column(name = "key_id", nullable = false, unique = true)
+    private String keyId;
+
+    @Column(name = "hashed_token", nullable = false)
+    private String hashedToken;
 
     @Column(name="expires_at", nullable = false)
     private Instant expiresAt;
@@ -35,15 +37,19 @@ public class PasswordResetToken extends EntityBase {
 
     @Column(nullable = false)
     private boolean used = false;
-
-    public PasswordResetToken(SnowflakeIdGenerator snowflakeId, User user, String token, Instant expiresAt) {
-        super(snowflakeId);
-        this.user = user;
-        this.token = token;
-        this.expiresAt = expiresAt;
-    }
     
     public boolean isExpired() {
-        return Instant.now().isAfter(expiresAt);
+        return Instant.now().isAfter(expiresAt) || used;
+    }
+
+    public void markAsUsed() {
+        this.used = true;
+    }
+
+    public PasswordResetToken(User user, String keyId, String tokenValue, Instant expires) {
+        this.user = user;
+        this.keyId = keyId;
+        this.hashedToken = tokenValue;
+        this.expiresAt = expires;
     }
 }

@@ -16,7 +16,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.ednaldoluiz.websocket.domain.model.base.TimestampedEntityBase;
 import com.ednaldoluiz.websocket.domain.model.room.UsersRooms;
-import com.ednaldoluiz.websocket.shared.generator.SnowflakeIdGenerator;
 
 @Getter
 @Setter
@@ -67,21 +66,12 @@ public class User extends TimestampedEntityBase implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PasswordResetToken> passwordResetTokens;
 
-    public User(SnowflakeIdGenerator idGenerator) {
-        super(idGenerator);
-    }
-
-    public User(SnowflakeIdGenerator idGenerator, String email, String hashedPassword, String name, String phone) {
-        super(idGenerator);
+    public User(String email, String hashedPassword, String name, String phone) {
         this.email = email;
         this.password = hashedPassword.toCharArray();
         this.name = name;
         this.phone = phone;
         this.roles = Collections.singleton(Role.USER);
-    }
-
-    public void clearPassword() {
-        Arrays.fill(password, '\0'); // Limpa a senha após o uso
     }
 
     @Override
@@ -97,5 +87,13 @@ public class User extends TimestampedEntityBase implements UserDetails {
     @Override
     public String getUsername() {
         return this.email;
+    }
+
+    public void softDelete() {
+        this.deleted = true;
+    }
+
+    public void clearPassword() {
+        Arrays.fill(password, '\0');
     }
 }
