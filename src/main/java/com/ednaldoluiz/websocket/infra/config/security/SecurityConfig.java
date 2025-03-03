@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.config;
+package com.ednaldoluiz.websocket.infra.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,14 +25,16 @@ import com.ednaldoluiz.websocket.infra.security.service.CustomUserDetailsService
 import com.ednaldoluiz.websocket.shared.constants.BeanConstants;
 
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
 
-    private static final String[] SWAGGER_URLS = {
+    static String[] SWAGGER_URLS = {
             "/v2/api-docs",
             "/v3/api-docs",
             "/v3/api-docs/**",
@@ -44,7 +46,7 @@ public class SecurityConfig {
             "/webjars/**"
     };
 
-    private static final String[] AUTH_WHITELIST = {
+    static String[] AUTH_WHITELIST = {
             "/api/v1/auth/login",
             "/api/v1/auth/register",
             "/api/v1/auth/generate-password",
@@ -52,11 +54,11 @@ public class SecurityConfig {
             "/api/v1/auth/reset-password"
     };
 
-    private final CustomUserDetailsService customUserDetailsService;
-    private final JwtAuthFilter jwtAuthFilter;
-    private final CustomAuthFailureHandler authFailureHandler;
-    private final CustomAccessDeniedHandler accessDeniedHandler;
-    private final CustomLogoutHandler logoutHandler;
+    CustomUserDetailsService customUserDetailsService;
+    JwtAuthFilter jwtAuthFilter;
+    CustomAuthFailureHandler authFailureHandler;
+    CustomAccessDeniedHandler accessDeniedHandler;
+    CustomLogoutHandler logoutHandler;
 
     @Bean(name = BeanConstants.Security.AUTHENTICATION_MANAGER)
     public AuthenticationManager authenticationManager() {

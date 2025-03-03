@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.config;
+package com.ednaldoluiz.websocket.infra.config.web;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +12,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
 
-import com.ednaldoluiz.websocket.infra.websocket.interceptor.StompCommandInterceptor;
+import com.ednaldoluiz.websocket.infra.web.websocket.interceptor.StompCommandInterceptor;
 
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
