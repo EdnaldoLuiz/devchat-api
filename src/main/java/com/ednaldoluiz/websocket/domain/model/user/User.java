@@ -18,7 +18,6 @@ import com.ednaldoluiz.websocket.domain.model.base.TimestampedEntityBase;
 import com.ednaldoluiz.websocket.domain.model.room.UsersRooms;
 
 @Getter
-@Setter
 @Entity
 @Table(name = "users", schema = "websocket")
 @NoArgsConstructor
@@ -30,6 +29,7 @@ public class User extends TimestampedEntityBase implements UserDetails {
     @Column(name = "email", nullable = false, length = 70, unique = true)
     private String email;
 
+    @Setter
     @Column(name = "password", nullable = false, length = 255)
     private char[] password;
 
@@ -38,6 +38,9 @@ public class User extends TimestampedEntityBase implements UserDetails {
 
     @Column(name = "avatar", length = 255)
     private String avatar;
+
+    @Column(name = "bio", length = 255)
+    private String bio;
 
     @Column(name = "deleted", nullable = false, columnDefinition = "boolean default false")
     private boolean deleted;
@@ -54,6 +57,10 @@ public class User extends TimestampedEntityBase implements UserDetails {
     @Column(name = "role")
     private Set<Role> roles = new HashSet<>();
 
+    @Column(name = "auth_provider", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider = AuthProvider.EMAIL_PASSWORD;
+
     @Transient
     private UserStatus status = UserStatus.OFFLINE;
 
@@ -66,11 +73,20 @@ public class User extends TimestampedEntityBase implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PasswordResetToken> passwordResetTokens;
 
-    public User(String email, String hashedPassword, String name, String phone) {
+    public User(String email, String hashedPassword, String name) {
         this.email = email;
         this.password = hashedPassword.toCharArray();
         this.name = name;
-        this.phone = phone;
+        this.roles = Collections.singleton(Role.USER);
+    }
+
+    public User(String email, String name, String avatar, String bio, AuthProvider authProvider) {
+        this.email = email;
+        this.name = name;
+        this.authProvider = authProvider;
+        this.avatar = avatar;
+        this.bio = bio;
+        this.password = new char[0];
         this.roles = Collections.singleton(Role.USER);
     }
 
