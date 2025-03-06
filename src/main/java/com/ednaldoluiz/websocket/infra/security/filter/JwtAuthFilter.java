@@ -2,6 +2,7 @@ package com.ednaldoluiz.websocket.infra.security.filter;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +28,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
+    private static final Set<String> EXCLUDED_PATHS = Set.of(
+        "/favicon.ico",
+        "/api/v1/auth/login",
+        "/api/v1/auth/register",
+        "/api/v1/auth/generate-password",
+        "/api/v1/auth/oauth2/success",
+        "/api/v1/auth/oauth2/failure"
+    );
+
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
@@ -49,8 +59,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private boolean isExcludedPath(HttpServletRequest request) {
         String path = request.getServletPath();
-        log.info("Path: {}", path);
-        return path.matches("/api/v1/auth/login|/api/v1/auth/register|/api/v1/auth/generate-password");
+        return EXCLUDED_PATHS.contains(path);
     }
 
     private Optional<String> extractJwtFromHeader(HttpServletRequest request) {
