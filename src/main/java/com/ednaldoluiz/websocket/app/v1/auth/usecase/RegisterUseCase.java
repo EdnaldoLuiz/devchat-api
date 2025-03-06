@@ -30,7 +30,7 @@ public class RegisterUseCase {
         validators.forEach(validator -> validator.validate(request));
 
         String hashedPassword = passwordEncoder.encode(request.password());
-        User user = new User(request.email(), hashedPassword, request.name(), request.phone());
+        User user = new User(request.email(), hashedPassword, request.name());
 
         userRepository.save(user);
         user.clearPassword();

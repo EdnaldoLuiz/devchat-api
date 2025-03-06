@@ -60,13 +60,6 @@ public interface AuthDocs {
                                 <td>Deve ter entre 3 e 50 caracteres e não pode estar em branco.</td>
                             </tr>
                             <tr>
-                                <td><strong>phone</strong></td>
-                                <td>`@NotBlank`, `@Phone`</td>
-                                <td>Número de telefone do usuário.</td>
-                                <td>11912345678</td>
-                                <td>Deve ter 10 ou 11 dígitos, iniciar com um DDD válido e não pode ser repetido.</td>
-                            </tr>
-                            <tr>
                                 <td><strong>terms</strong></td>
                                 <td>`@AssertTrue`</td>
                                 <td>Confirmação dos termos de uso.</td>

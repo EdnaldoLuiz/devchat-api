@@ -1,6 +1,5 @@
 package com.ednaldoluiz.websocket.app.v1.auth.dto.request;
 
-import com.ednaldoluiz.websocket.infra.annotation.phone.Phone;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
@@ -41,14 +40,6 @@ public record RegisterRequest(
         example = "João Silva"
     )
     String name,
-
-    @NotBlank(message = "{register.phone.notBlank}")
-    @Phone(message = "{register.phone.invalid}")
-    @Schema(
-        description = "Número de telefone do usuário no formato internacional. Deve conter DDD e ter entre 10 e 11 dígitos.",
-        example = "11912345678"
-    )
-    String phone,
 
     @AssertTrue(message = "{register.terms.isTrue}")
     @Schema(
