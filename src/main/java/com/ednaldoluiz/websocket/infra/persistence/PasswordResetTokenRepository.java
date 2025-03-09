@@ -24,4 +24,7 @@ public interface PasswordResetTokenRepository extends BaseRepository<PasswordRes
     
     Optional<PasswordResetToken> findByKeyId(String key);
 
+    @Query("SELECT t FROM PasswordResetToken t JOIN FETCH t.user WHERE t.id = :id")
+    Optional<PasswordResetToken> findByIdWithUser(Long id);
+
 }

@@ -13,13 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.OAuth2LoginResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.OAuth2LoginUseCase;
 import com.ednaldoluiz.websocket.domain.model.user.AuthProvider;
+import com.ednaldoluiz.websocket.infra.web.route.Paths;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 
 @Hidden
 @Controller
-@RequestMapping("/api/v1/auth/oauth2")
+@RequestMapping(Paths.V1.Auth.AUTH + "/oauth2")
 @RequiredArgsConstructor
 public class OAuth2AuthController {
 

@@ -38,7 +38,6 @@ public class AsyncAwsSesEmailAdapter implements EmailPort {
      * @param to      Destinatário
      * @param subject Assunto
      * @param htmlBody Corpo do e-mail em HTML
-     * @return CompletableFuture indicando sucesso ou falha.
      */
     @Override
     @Async("customTaskExecutor")

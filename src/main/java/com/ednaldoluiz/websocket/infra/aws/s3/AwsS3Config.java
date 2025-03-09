@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.config.aws;
+package com.ednaldoluiz.websocket.infra.aws.s3;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -6,26 +6,26 @@ import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.ses.SesClient;
+import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
-public class AwsSesConfig {
+public class AwsS3Config {
 
     @Value("${aws.region}")
     private String region;
 
     @Value("${aws.accessKeyId}")
-    private String accessKey;
+    private String accessKeyId;
 
     @Value("${aws.secretAccessKey}")
-    private String secretKey;
+    private String secretAccessKey;
 
     @Bean
-    public SesClient sesClient() {
-        return SesClient.builder()
+    public S3Client s3Client() {
+        return S3Client.builder()
                 .region(Region.of(region))
                 .credentialsProvider(
-                        StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey))
+                        StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKeyId, secretAccessKey))
                 )
                 .build();
     }

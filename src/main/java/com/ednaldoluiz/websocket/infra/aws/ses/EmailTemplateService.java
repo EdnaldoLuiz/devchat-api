@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.email;
+package com.ednaldoluiz.websocket.infra.aws.ses;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.config.persistence;
+package com.ednaldoluiz.websocket.infra.security.config;
 
 import java.util.Optional;
 

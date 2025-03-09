@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.config.jobs;
+package com.ednaldoluiz.websocket.infra.schedule;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

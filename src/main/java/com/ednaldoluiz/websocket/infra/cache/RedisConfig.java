@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.config.persistence;
+package com.ednaldoluiz.websocket.infra.cache;
 
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.cache.annotation.EnableCaching;

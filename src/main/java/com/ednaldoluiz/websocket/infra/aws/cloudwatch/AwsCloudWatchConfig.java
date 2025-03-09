@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.config.aws;
+package com.ednaldoluiz.websocket.infra.aws.cloudwatch;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
