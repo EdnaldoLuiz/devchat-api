@@ -1,6 +1,8 @@
 package com.ednaldoluiz.websocket.domain.model.user;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
 
@@ -30,16 +32,16 @@ public class PasswordResetToken extends EntityBase {
     private String hashedToken;
 
     @Column(name="expires_at", nullable = false)
-    private Instant expiresAt;
+    private LocalDateTime expiresAt;
 
     @Column(name="created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private Instant createdAt = Instant.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(nullable = false)
     private boolean used = false;
     
     public boolean isExpired() {
-        return Instant.now().isAfter(expiresAt) || used;
+        return expiresAt.isBefore(LocalDateTime.now()) || used;
     }
 
     public void markAsUsed() {
@@ -50,6 +52,6 @@ public class PasswordResetToken extends EntityBase {
         this.user = user;
         this.keyId = keyId;
         this.hashedToken = tokenValue;
-        this.expiresAt = expires;
+        this.expiresAt = LocalDateTime.ofInstant(expires, ZoneId.systemDefault());
     }
 }

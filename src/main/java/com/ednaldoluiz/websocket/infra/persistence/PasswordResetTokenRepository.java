@@ -1,6 +1,6 @@
 package com.ednaldoluiz.websocket.infra.persistence;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Modifying;
@@ -20,7 +20,7 @@ public interface PasswordResetTokenRepository extends BaseRepository<PasswordRes
         WHERE t.expiresAt < :now 
         AND t.used = false
     """)
-    int deleteExpiredUnusedTokens(Instant now);
+    int deleteExpiredUnusedTokens(LocalDateTime now);
     
     Optional<PasswordResetToken> findByKeyId(String key);
 
