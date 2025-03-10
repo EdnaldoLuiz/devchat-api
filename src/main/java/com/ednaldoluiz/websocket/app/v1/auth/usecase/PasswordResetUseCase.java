@@ -25,26 +25,22 @@ public class PasswordResetUseCase {
     @Transactional
     public void execute(ResetPasswordRequest request) {
         log.info("Redefinindo senha para algum usuário.");
-        // Buscar o token pelo "k" (keyId)
+        
         PasswordResetToken resetToken = tokenRepository.findByKeyId(request.key())
             .orElseThrow(() -> new PasswordValidationException("Token inválido ou expirado."));
 
-        // Verifica se está expirado ou já foi usado
         if (resetToken.isExpired()) {
             throw new PasswordValidationException("Token expirado ou já utilizado.");
         }
 
-        // Valida se o token fornecido (`t`) corresponde ao hash armazenado
         if (!passwordEncoder.matches(request.token(), resetToken.getHashedToken())) {
             throw new PasswordValidationException("Token inválido.");
         }
 
-        // Valida se as senhas são idênticas
         if (!request.password().equals(request.confirmPassword())) {
             throw new PasswordValidationException("Senhas não conferem.");
         }
 
-        // Buscar usuário e redefinir a senha
         User user = userRepository.findById(resetToken.getUser().getId())
             .orElseThrow(() -> new PasswordValidationException("Usuário não encontrado."));
 

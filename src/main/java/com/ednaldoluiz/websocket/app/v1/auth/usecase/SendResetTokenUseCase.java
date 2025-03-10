@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ednaldoluiz.websocket.domain.model.user.PasswordResetToken;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.domain.port.EmailPort;
-import com.ednaldoluiz.websocket.infra.email.EmailTemplateService;
+import com.ednaldoluiz.websocket.infra.aws.ses.EmailTemplateService;
 import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.LoginValidationException;
@@ -38,26 +38,26 @@ public class SendResetTokenUseCase {
         User user = userRepository.findByEmail(recipientEmail)
                 .orElseThrow(() -> new LoginValidationException("O e-mail informado não está cadastrado."));
 
-        PasswordResetToken tokenEntity = generatePasswordResetToken(user);
+        String rawToken = UUID.randomUUID().toString();
+        PasswordResetToken tokenEntity = generatePasswordResetToken(user, rawToken);
         tokenRepository.save(tokenEntity);
 
-        String resetLink = generateResetLink(tokenEntity);
+        String resetLink = generateResetLink(tokenEntity.getKeyId(), rawToken);
         sendResetEmail(user.getEmail(), user.getName(), resetLink);
         log.info("Token de redefinição gerado e enviado para {}", recipientEmail);
     }
 
-    private PasswordResetToken generatePasswordResetToken(User user) {
+    private PasswordResetToken generatePasswordResetToken(User user, String rawToken) {
         String keyId = UUID.randomUUID().toString();
-        String rawToken = UUID.randomUUID().toString();
         String hashedToken = passwordEncoder.encode(rawToken);
         Instant expires = Instant.now().plus(30, ChronoUnit.MINUTES);
 
         return new PasswordResetToken(user, keyId, hashedToken, expires);
     }
 
-    private String generateResetLink(PasswordResetToken token) {
-        String encodedKey = URLEncoder.encode(token.getKeyId(), StandardCharsets.UTF_8);
-        String encodedToken = URLEncoder.encode(UUID.randomUUID().toString(), StandardCharsets.UTF_8);
+    private String generateResetLink(String keyId, String rawToken) {
+        String encodedKey = URLEncoder.encode(keyId, StandardCharsets.UTF_8);
+        String encodedToken = URLEncoder.encode(rawToken, StandardCharsets.UTF_8);
 
         return String.format("http://localhost:3000/reset-password?k=%s&t=%s", encodedKey, encodedToken);
     }
