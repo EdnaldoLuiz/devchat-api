@@ -2,8 +2,6 @@ package com.ednaldoluiz.websocket.app.v1.auth.usecase;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,9 +48,8 @@ public class SendResetTokenUseCase {
     private PasswordResetToken generatePasswordResetToken(User user, String rawToken) {
         String keyId = UUID.randomUUID().toString();
         String hashedToken = passwordEncoder.encode(rawToken);
-        Instant expires = Instant.now().plus(30, ChronoUnit.MINUTES);
 
-        return new PasswordResetToken(user, keyId, hashedToken, expires);
+        return new PasswordResetToken(user, keyId, hashedToken);
     }
 
     private String generateResetLink(String keyId, String rawToken) {

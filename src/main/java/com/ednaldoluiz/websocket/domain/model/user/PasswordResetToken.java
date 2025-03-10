@@ -1,8 +1,6 @@
 package com.ednaldoluiz.websocket.domain.model.user;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
 
@@ -48,10 +46,10 @@ public class PasswordResetToken extends EntityBase {
         this.used = true;
     }
 
-    public PasswordResetToken(User user, String keyId, String tokenValue, Instant expires) {
+    public PasswordResetToken(User user, String keyId, String tokenValue) {
         this.user = user;
         this.keyId = keyId;
         this.hashedToken = tokenValue;
-        this.expiresAt = LocalDateTime.ofInstant(expires, ZoneId.systemDefault());
+        this.expiresAt = LocalDateTime.now().plusMinutes(30);
     }
 }
