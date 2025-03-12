@@ -1,5 +1,7 @@
 package com.ednaldoluiz.websocket.v1.integration.base;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -15,18 +17,18 @@ import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
 import com.ednaldoluiz.websocket.v1.integration.config.TestSecurityConfig;
 
 import io.netty.handler.logging.LogLevel;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.transport.logging.AdvancedByteBufFormat;
 
-@Slf4j
 @ActiveProfiles("test")
 @Import(TestSecurityConfig.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public abstract class AbstractAuthIT {
+
+    protected final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     protected UserRepository userRepository;
