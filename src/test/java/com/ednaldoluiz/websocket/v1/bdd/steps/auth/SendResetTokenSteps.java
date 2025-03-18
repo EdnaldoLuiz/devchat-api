@@ -4,76 +4,96 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Objects;
-
-import io.cucumber.java.pt.Dado;
-import io.cucumber.java.pt.Quando;
-import io.cucumber.java.pt.Então;
-import reactor.core.publisher.Mono;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 import org.springframework.http.ResponseEntity;
 
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
+import com.ednaldoluiz.websocket.infra.web.controller.common.GenericApiResponse;
+import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
 import com.ednaldoluiz.websocket.infra.web.route.Paths;
 import com.ednaldoluiz.websocket.v1.bdd.steps.BaseSteps;
+import com.ednaldoluiz.websocket.v1.shared.helpers.ApiRequestHelper;
 
 public class SendResetTokenSteps extends BaseSteps {
 
     private ResponseEntity<?> response;
     private String recoveryEmail;
 
-    @Dado("que eu limpei o banco de dados para garantir um estado inicial para os testes de envio de token de recuperação")
+    @Given("que eu limpei o banco de dados para os testes de envio de token de recuperação")
     public void limparBanco() {
         limparBancoDeDados();
     }
 
-    @Dado("que existe um payload de recuperação para o email {string}")
+    @Given("que existe um payload de recuperação para o email {string}")
     public void payloadRecuperacao(String email) {
         this.recoveryEmail = email;
     }
 
-    @Dado("que existe um usuário cadastrado para recuperação de senha com email {string} e senha {string}")
+    @Given("que existe um usuário cadastrado para recuperação de senha com email {string} e senha {string}")
     public void usuarioCadastradoParaResetDeSenha(String email, String senha) {
         var registerRequest = new RegisterRequest(
-            email,
-            senha,
-            senha,
-            "Usuário Teste",
-            true
-        );
+                email,
+                senha,
+                senha,
+                "Usuário Teste",
+                true);
         insertUserIntoDatabase(registerRequest);
     }
 
-    @Quando("eu envio uma requisição de redefinição de senha")
-    public void envioRequisicaoRedefinicao() {
+    @When("eu envio uma requisição de redefinição de senha com um email válido")
+    public void envioRequisicaoRedefinicaoValida() {
         String uri = Paths.V1.Auth.AUTH + Paths.Auth.FORGOT_PASSWORD + "?email=" + recoveryEmail;
-        Mono<ResponseEntity<String>> responseMono = webClient.post()
-            .uri(uri)
-            .retrieve()
-            .toEntity(String.class)
-            .onErrorResume(e -> {
-                log.error("Erro ao solicitar redefinição de senha: {}", e.getMessage());
-                return Mono.just(ResponseEntity.badRequest().body("Erro: " + e.getMessage()));
-            });
+        log.info("🚀 Enviando requisição para: {}", uri);
 
-        response = responseMono.block();
+        response = ApiRequestHelper.doPost(uri, webClient, "", GenericApiResponse.class);
     }
 
-    @Então("a resposta deve ser de sucesso com status {int}")
-    public void respostaSucesso(int status) {
-        assertEquals(status, response.getStatusCode());
+    @When("eu envio uma requisição de redefinição de senha com um email inválido")
+    public void envioRequisicaoRedefinicaoInvalida() {
+        String uri = Paths.V1.Auth.AUTH + Paths.Auth.FORGOT_PASSWORD + "?email=" + recoveryEmail;
+        log.info("🚀 Enviando requisição para: {}", uri);
+
+        response = ApiRequestHelper.doPost(uri, webClient, "", ErrorResponse.class);
     }
 
-    @Então("a resposta deve retornar status {int}")
+    @Then("o status da resposta da API de recuperação deve ser {int}")
     public void respostaStatus(int status) {
-        assertEquals(status, response.getStatusCode());
+        assertNotNull(response, "A resposta não pode ser nula");
+        assertNotNull(response.getBody(), "O corpo da resposta não pode ser nulo");
+        assertEquals(status, response.getStatusCode().value(), "O status da resposta não é o esperado");
+
+        if (status == 200) {
+            assertTrue(response.getBody() instanceof GenericApiResponse,
+                    "O corpo da resposta deveria ser um GenericApiResponse");
+        } else {
+            assertTrue(response.getBody() instanceof ErrorResponse, "O corpo da resposta deveria ser um ErrorResponse");
+        }
     }
 
-    @Então("deve conter a mensagem {string}")
-    public void respostaContemMensagem(String mensagem) {
+    @Then("a resposta de sucesso deve conter a mensagem {string}")
+    public void verificarMensagemSucesso(String mensagemEsperada) {
         assertNotNull(response.getBody(), "A resposta não pode ser nula");
-        String responseAsString = Objects.requireNonNull(response.getBody()).toString();
-        assertTrue(responseAsString.contains(mensagem),
-            "A resposta não contém a mensagem esperada: " + mensagem);
+
+        GenericApiResponse sucessResponse = (GenericApiResponse) response.getBody();
+        assertNotNull(sucessResponse, "A mensagem de sucesso não pode ser nula");
+        log.info("Mensagem da API (sucesso): {}", sucessResponse.getMessage());
+        
+        assertTrue(sucessResponse.getMessage().contains(mensagemEsperada),
+            "A resposta não contém a mensagem esperada: " + mensagemEsperada);
+    }
+
+    @Then("a resposta de erro deve conter a mensagem {string}")
+    public void verificarMensagemErro(String mensagemEsperada) {
+        assertNotNull(response.getBody(), "A resposta não pode ser nula");
+
+        ErrorResponse errorResponse = (ErrorResponse) response.getBody();
+        assertNotNull(errorResponse, "A mensagem de erro não pode ser nula");
+        log.info("Mensagem da API (erro): {}", errorResponse.error());
+        
+        assertTrue(errorResponse.error().contains(mensagemEsperada),
+            "A resposta não contém a mensagem esperada: " + mensagemEsperada);
     }
 }

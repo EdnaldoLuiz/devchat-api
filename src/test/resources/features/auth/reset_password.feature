@@ -5,19 +5,19 @@ Feature: Recuperação de Senha
   Para redefinir minha senha caso eu esqueça
 
   Background:
-    Dado que eu limpei o banco de dados para garantir um estado inicial
+    Given que eu limpei o banco de dados para os testes de envio de token de recuperação
 
   @reset_valido
   Scenario: Solicitar reset de senha com email cadastrado
-    Dado que existe um usuário pré-cadastrado com email "exemplo@teste.com" e senha "SenhaForte123!"
-    E que existe um payload de recuperação para o email "exemplo@teste.com"
-    Quando eu envio uma requisição de redefinição de senha
-    Então a resposta deve ser de sucesso com status 200
-    E deve conter a mensagem "Se o e-mail existir, uma mensagem de redefinição foi enviada."
+    Given que existe um usuário pré-cadastrado com email "exemplo@teste.com" e senha "SenhaForte123!"
+    And que existe um payload de recuperação para o email "exemplo@teste.com"
+    When eu envio uma requisição de redefinição de senha com um email válido
+    Then o status da resposta da API de recuperação deve ser 200
+    And a resposta de sucesso deve conter a mensagem "E-mail de redefinição de senha enviado com sucesso"
 
   @reset_email_invalido
   Scenario: Solicitar reset de senha com email inexistente
-    Dado que existe um payload de recuperação para o email "inexistente@teste.com"
-    Quando eu envio uma requisição de redefinição de senha
-    Então a resposta deve retornar status 400
-    E deve conter a mensagem "O e-mail informado não está cadastrado."
+    Given que existe um payload de recuperação para o email "inexistente@teste.com"
+    When eu envio uma requisição de redefinição de senha com um email inválido
+    Then o status da resposta da API de recuperação deve ser 404
+    And a resposta de erro deve conter a mensagem "O e-mail informado não está cadastrado."

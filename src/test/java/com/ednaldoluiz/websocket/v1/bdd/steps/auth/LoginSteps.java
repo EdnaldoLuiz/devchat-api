@@ -22,9 +22,7 @@ public class LoginSteps extends BaseSteps {
 
     @Given("que eu limpei o banco de dados para garantir um estado inicial para os testes de login")
     public void limparBanco() {
-        log.info("Limpando banco de dados...");
-        userRepository.deleteAll();
-        log.info("Banco de dados limpo.");
+        limparBancoDeDados();
     }
 
     @Given("que existe um usuário pré-cadastrado com email {string} e senha {string}")
