@@ -10,14 +10,5 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing()
 public class AuditingConfig {
 
-    // /**
-    //  * Fornece o ID do usuário autenticado.
-    //  *
-    //  * @return Optional contendo o ID do usuário.
-    //  */
-    // public AuditorAware<Long> auditorProvider() {
-    //     return () -> {
-    //         return Optional.of(1L);
-    //     };
-    // }
+    
 }
