@@ -30,7 +30,7 @@ Feature: Registro de Usuário
       Given que existe um payload de registro com senhas diferentes
       When eu envio uma requisição de registro
       Then o status da resposta da API de registro deve ser 400
-      And deve conter a mensagem "As senhas não coincidem."
+      And deve conter a mensagem "Senhas não conferem."
 
     @registro_senha_fraca
     Scenario Outline: Tentar registrar usuário com senha fraca
