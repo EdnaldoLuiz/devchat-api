@@ -14,9 +14,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.ednaldoluiz.websocket.infra.web.handler.exception.EmailNotRegisteredException;
+import com.ednaldoluiz.websocket.infra.web.handler.exception.InvalidTokenException;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.LoginValidationException;
+import com.ednaldoluiz.websocket.infra.web.handler.exception.MismatchedPasswordsException;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.PasswordValidationException;
 import com.ednaldoluiz.websocket.infra.web.handler.exception.RegisterValidationException;
+import com.ednaldoluiz.websocket.infra.web.handler.exception.ResetPasswordUserNotFoundException;
 
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 
@@ -39,7 +43,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler({RegisterValidationException.class, LoginValidationException.class})
+    @ExceptionHandler({RegisterValidationException.class, LoginValidationException.class, InvalidTokenException.class, 
+        MismatchedPasswordsException.class, ResetPasswordUserNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleRegisterValidationException(
             RuntimeException ex, HttpServletRequest request) {
 
@@ -52,7 +57,20 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-     @ExceptionHandler(PasswordValidationException.class)
+    @ExceptionHandler({EmailNotRegisteredException.class})
+    public ResponseEntity<ErrorResponse> handleNotFoundException(
+            RuntimeException ex, HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Erro de validação com as credenciais do usuário",
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                request.getRequestURI());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PasswordValidationException.class)
     public ResponseEntity<ErrorResponse> handlePasswordValidationException(
             PasswordValidationException ex, HttpServletRequest request) {
 

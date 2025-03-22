@@ -14,7 +14,7 @@ import com.ednaldoluiz.websocket.domain.port.EmailPort;
 import com.ednaldoluiz.websocket.infra.aws.ses.EmailTemplateService;
 import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
-import com.ednaldoluiz.websocket.infra.web.handler.exception.LoginValidationException;
+import com.ednaldoluiz.websocket.infra.web.handler.exception.EmailNotRegisteredException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ public class SendResetTokenUseCase {
     public void execute(String recipientEmail) {
         log.info("Solicitação de redefinição de senha para o e-mail: {}", recipientEmail);
         User user = userRepository.findByEmail(recipientEmail)
-                .orElseThrow(() -> new LoginValidationException("O e-mail informado não está cadastrado."));
+                .orElseThrow(() -> new EmailNotRegisteredException("O e-mail informado não está cadastrado."));
 
         String rawToken = UUID.randomUUID().toString();
         PasswordResetToken tokenEntity = generatePasswordResetToken(user, rawToken);

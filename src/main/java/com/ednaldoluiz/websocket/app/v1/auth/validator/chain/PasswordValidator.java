@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.validator.AuthValidator;
 import com.ednaldoluiz.websocket.infra.security.policy.PasswordPolicy;
-import com.ednaldoluiz.websocket.infra.web.handler.exception.PasswordValidationException;
+import com.ednaldoluiz.websocket.infra.web.handler.exception.MismatchedPasswordsException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class PasswordValidator implements AuthValidator<RegisterRequest> {
         log.info("Validando senha do usuário: {}", request.email());
         boolean isPasswordValid = request.password().equals(request.confirmPassword());
         if (!isPasswordValid) {
-            throw new PasswordValidationException("As senhas não coincidem.");
+            throw new MismatchedPasswordsException();
         }
         passwordPolicy.validatePassword(request.password());
     }

@@ -11,7 +11,9 @@ import com.ednaldoluiz.websocket.domain.model.user.PasswordResetToken;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
-import com.ednaldoluiz.websocket.infra.web.handler.exception.PasswordValidationException;
+import com.ednaldoluiz.websocket.infra.web.handler.exception.InvalidTokenException;
+import com.ednaldoluiz.websocket.infra.web.handler.exception.MismatchedPasswordsException;
+import com.ednaldoluiz.websocket.infra.web.handler.exception.ResetPasswordUserNotFoundException;
 
 @Slf4j
 @Component
@@ -25,24 +27,24 @@ public class PasswordResetUseCase {
     @Transactional
     public void execute(ResetPasswordRequest request) {
         log.info("Redefinindo senha para algum usuário.");
+
+        if (!request.password().equals(request.confirmPassword())) {
+            throw new MismatchedPasswordsException();
+        }
         
         PasswordResetToken resetToken = tokenRepository.findByKeyId(request.key())
-            .orElseThrow(() -> new PasswordValidationException("Token inválido ou expirado."));
+            .orElseThrow(() -> new InvalidTokenException("Token inválido ou expirado."));
+
+        User user = userRepository.findById(resetToken.getUser().getId())
+            .orElseThrow(ResetPasswordUserNotFoundException::new);
 
         if (resetToken.isExpired()) {
-            throw new PasswordValidationException("Token expirado ou já utilizado.");
+            throw new InvalidTokenException("Token expirado ou já utilizado.");
         }
 
         if (!passwordEncoder.matches(request.token(), resetToken.getHashedToken())) {
-            throw new PasswordValidationException("Token inválido.");
+            throw new InvalidTokenException("Token inválido.");
         }
-
-        if (!request.password().equals(request.confirmPassword())) {
-            throw new PasswordValidationException("Senhas não conferem.");
-        }
-
-        User user = userRepository.findById(resetToken.getUser().getId())
-            .orElseThrow(() -> new PasswordValidationException("Usuário não encontrado."));
 
         user.setPassword(passwordEncoder.encode(request.password()).toCharArray());
         userRepository.save(user);
