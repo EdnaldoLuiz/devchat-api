@@ -10,6 +10,7 @@ import io.cucumber.java.en.Then;
 
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.RegisterResponse;
+import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
 import com.ednaldoluiz.websocket.infra.web.route.Paths;
 import com.ednaldoluiz.websocket.v1.bdd.steps.BaseSteps;
 import com.ednaldoluiz.websocket.v1.shared.helpers.ApiRequestHelper;
@@ -18,19 +19,24 @@ public class RegisterSteps extends BaseSteps {
 
     private RegisterRequest registerRequest;
 
-    @Given("que eu limpei o banco de dados para garantir um estado inicial para os testes de registro")
-    public void limparBanco() {
-        limparBancoDeDados();
-    }
-
     @Given("que existe um payload de registro válido")
     public void payloadValido() {
-        registerRequest = new RegisterRequest("test@example.com", "SenhaForte123!", "SenhaForte123!", "Teste da Silva", true);
+        registerRequest = new RegisterRequest(
+            "test@example.com", 
+            "SenhaForte123!", 
+            "SenhaForte123!", 
+            "Teste da Silva", 
+            true);
     }
 
     @Given("que existe um usuario pré-cadastrado com email {string}")
     public void usuarioPreCadastrado(String email) {
-        insertUserIntoDatabase(new RegisterRequest(email, "SenhaForte123!", "SenhaForte123!", "Usuário Existente", true));
+        insertUserIntoDatabase(new RegisterRequest(
+            email, 
+            "SenhaForte123!", 
+            "SenhaForte123!", 
+            "Usuário Existente", 
+            true));
     }
 
     @Given("que existe um payload de registro com senhas diferentes")
@@ -70,9 +76,14 @@ public class RegisterSteps extends BaseSteps {
         log.info("Resposta da requisição de registro: {}", response);
     }
 
-    @Then("o status da resposta da API de registro deve ser {int}")
-    public void verificarStatusRegistro(int status) {
+    @Then("o status da resposta da API de registro deve ser sucesso {int}")
+    public void verificarStatusRegistroSucesso(int status) {
         verificarStatus(status, RegisterResponse.class);
+    }
+
+    @Then("o status da resposta da API de registro deve ser um erro {int}")
+    public void verificarStatusRegistroErro(int status) {
+        verificarStatus(status, ErrorResponse.class);
     }
 
     @Then("deve retornar o email do novo usuário e seus tokens")

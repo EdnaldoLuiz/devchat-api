@@ -31,12 +31,6 @@ public class ResetPasswordSteps extends BaseSteps {
     private ResetPasswordRequest requestPayload;
     private ResponseEntity<?> response;
 
-    @Given("que eu tenha limpado o banco de dados para os testes de reset de senha")
-    public void limparBanco() {
-        tokenRepository.deleteAll();
-        limparBancoDeDados();
-    }
-
     @Given("que existe um usuário cadastrado com email {string}")
     public void criarUsuario(String email) {
         var user = new User(email, passwordEncoder.encode("SenhaForte123!"), "Usuário Teste");

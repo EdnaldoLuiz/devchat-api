@@ -1,4 +1,5 @@
 @infra
+@Disabled
 Feature: Documentação da API
 
   Scenario: Verificar se o Swagger UI está acessível

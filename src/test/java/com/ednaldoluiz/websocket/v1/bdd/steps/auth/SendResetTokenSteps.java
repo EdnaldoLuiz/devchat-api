@@ -22,11 +22,6 @@ public class SendResetTokenSteps extends BaseSteps {
     private ResponseEntity<?> response;
     private String recoveryEmail;
 
-    @Given("que eu limpei o banco de dados para os testes de envio de token de recuperação")
-    public void limparBanco() {
-        limparBancoDeDados();
-    }
-
     @Given("que existe um payload de recuperação para o email {string}")
     public void payloadRecuperacao(String email) {
         this.recoveryEmail = email;
@@ -59,18 +54,24 @@ public class SendResetTokenSteps extends BaseSteps {
         response = ApiRequestHelper.doPost(uri, webClient, "", ErrorResponse.class);
     }
 
-    @Then("o status da resposta da API de recuperação deve ser {int}")
-    public void respostaStatus(int status) {
+    @Then("o status da resposta da API de recuperação deve ser sucesso {int}")
+    public void respostaStatusSucesso(int status) {
         assertNotNull(response, "A resposta não pode ser nula");
         assertNotNull(response.getBody(), "O corpo da resposta não pode ser nulo");
         assertEquals(status, response.getStatusCode().value(), "O status da resposta não é o esperado");
 
-        if (status == 200) {
-            assertTrue(response.getBody() instanceof GenericApiResponse,
-                    "O corpo da resposta deveria ser um GenericApiResponse");
-        } else {
-            assertTrue(response.getBody() instanceof ErrorResponse, "O corpo da resposta deveria ser um ErrorResponse");
-        }
+        assertTrue(response.getBody() instanceof GenericApiResponse,
+                "O corpo da resposta deveria ser um GenericApiResponse");
+    }
+
+    @Then("o status da resposta da API de recuperação deve ser um erro {int}")
+    public void respostaStatusErro(int status) {
+        assertNotNull(response, "A resposta não pode ser nula");
+        assertNotNull(response.getBody(), "O corpo da resposta não pode ser nulo");
+        assertEquals(status, response.getStatusCode().value(), "O status da resposta não é o esperado");
+
+        assertTrue(response.getBody() instanceof ErrorResponse,
+                "O corpo da resposta deveria ser um ErrorResponse");
     }
 
     @Then("a resposta de sucesso deve conter a mensagem {string}")
@@ -80,9 +81,9 @@ public class SendResetTokenSteps extends BaseSteps {
         GenericApiResponse sucessResponse = (GenericApiResponse) response.getBody();
         assertNotNull(sucessResponse, "A mensagem de sucesso não pode ser nula");
         log.info("Mensagem da API (sucesso): {}", sucessResponse.getMessage());
-        
+
         assertTrue(sucessResponse.getMessage().contains(mensagemEsperada),
-            "A resposta não contém a mensagem esperada: " + mensagemEsperada);
+                "A resposta não contém a mensagem esperada: " + mensagemEsperada);
     }
 
     @Then("a resposta de erro deve conter a mensagem {string}")
@@ -92,8 +93,8 @@ public class SendResetTokenSteps extends BaseSteps {
         ErrorResponse errorResponse = (ErrorResponse) response.getBody();
         assertNotNull(errorResponse, "A mensagem de erro não pode ser nula");
         log.info("Mensagem da API (erro): {}", errorResponse.error());
-        
+
         assertTrue(errorResponse.error().contains(mensagemEsperada),
-            "A resposta não contém a mensagem esperada: " + mensagemEsperada);
+                "A resposta não contém a mensagem esperada: " + mensagemEsperada);
     }
 }

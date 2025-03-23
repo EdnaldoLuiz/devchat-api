@@ -20,11 +20,6 @@ public class LoginSteps extends BaseSteps {
 
     private LoginRequest loginRequest;
 
-    @Given("que eu limpei o banco de dados para garantir um estado inicial para os testes de login")
-    public void limparBanco() {
-        limparBancoDeDados();
-    }
-
     @Given("que existe um usuário pré-cadastrado com email {string} e senha {string}")
     public void usuarioPreCadastrado(String email, String senha) {
         insertUserIntoDatabase(new RegisterRequest(email, senha, senha, "Usuário Teste", true));
