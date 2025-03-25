@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.ednaldoluiz.websocket.v1.integration.config.TestSecurityConfig;
+import com.ednaldoluiz.websocket.v1.config.TestSecurityConfig;
 
 @ActiveProfiles("test")
 @Import(TestSecurityConfig.class)
