@@ -1,6 +1,9 @@
 package com.ednaldoluiz.websocket.v1.integration.auth;
 
-import com.ednaldoluiz.websocket.v1.integration.config.TestContainerDatabaseConfig;
+import com.ednaldoluiz.websocket.v1.config.TestContainerDatabaseConfig;
+import com.ednaldoluiz.websocket.v1.shared.base.AbstractAuthTest;
+import com.ednaldoluiz.websocket.v1.shared.helpers.ApiRequestHelper;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
@@ -12,15 +15,16 @@ import org.springframework.http.ResponseEntity;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.LoginRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.LoginResponse;
-import com.ednaldoluiz.websocket.v1.integration.base.AbstractAuthIT;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
 import com.ednaldoluiz.websocket.infra.web.route.Paths;
 
 @Tag("auth")
-@SuppressWarnings("null")
+@SuppressWarnings({"null", "unchecked"})
 @ExtendWith({TestContainerDatabaseConfig.class})
-public class LoginIT extends AbstractAuthIT {
+public class LoginIT extends AbstractAuthTest {
 
     private final String URI = Paths.V1.Auth.AUTH + Paths.Auth.LOGIN;
 
@@ -41,7 +45,8 @@ public class LoginIT extends AbstractAuthIT {
                 "testuser@example.com",
                 "SenhaForte123!");
 
-        ResponseEntity<LoginResponse> response = doPost(URI, webClient, loginRequest, LoginResponse.class);
+        ResponseEntity<LoginResponse> response = (ResponseEntity<LoginResponse>) 
+        ApiRequestHelper.doPost(URI, webClient, loginRequest, LoginResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -57,10 +62,11 @@ public class LoginIT extends AbstractAuthIT {
                 "testuser@gmail.com",
                 "SenhaForte123!");
 
-        ResponseEntity<String> response = doPost(URI, webClient, loginRequest, String.class);
+        ResponseEntity<ErrorResponse> response = (ResponseEntity<ErrorResponse>) 
+        ApiRequestHelper.doPost(URI, webClient, loginRequest, ErrorResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).contains("Email ou senha inválidos.");
+        assertThat(response.getBody().message()).contains("Erro de validação com as credenciais do usuário");
     }
 
     @Test
@@ -72,9 +78,10 @@ public class LoginIT extends AbstractAuthIT {
                 "testuser@example.com",
                 "SenhaErrada456!");
 
-        ResponseEntity<String> response = doPost(URI, webClient, loginRequest, String.class);
+        ResponseEntity<ErrorResponse> response = (ResponseEntity<ErrorResponse>)
+        ApiRequestHelper.doPost(URI, webClient, loginRequest, String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).contains("Email ou senha inválidos.");
+        assertThat(response.getBody().message()).contains("Erro de validação com as credenciais do usuário");
     }
 }

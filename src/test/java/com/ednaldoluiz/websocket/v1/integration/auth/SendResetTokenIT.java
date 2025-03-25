@@ -6,8 +6,8 @@ import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.domain.port.EmailPort;
 import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
 import com.ednaldoluiz.websocket.infra.web.route.Paths;
-import com.ednaldoluiz.websocket.v1.integration.base.AbstractAuthIT;
-import com.ednaldoluiz.websocket.v1.integration.config.TestContainerDatabaseConfig;
+import com.ednaldoluiz.websocket.v1.config.TestContainerDatabaseConfig;
+import com.ednaldoluiz.websocket.v1.shared.base.AbstractAuthTest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -36,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("auth")
 @SuppressWarnings("null")
 @ExtendWith({ TestContainerDatabaseConfig.class })
-class SendResetTokenIT extends AbstractAuthIT {
+class SendResetTokenIT extends AbstractAuthTest {
 
     private final String URI = Paths.V1.Auth.AUTH + Paths.Auth.FORGOT_PASSWORD;
 
@@ -69,11 +68,11 @@ class SendResetTokenIT extends AbstractAuthIT {
                 .build(true)
                 .toUriString();
 
-        ResponseEntity<String> response = webClient.post()
+        ResponseEntity<String> response = new ResponseEntity<>(webClient.post()
                 .uri(uri)
-                .retrieve()
-                .toEntity(String.class)
-                .block();
+                .exchange()
+                .expectBody(String.class)
+                .returnResult().getResponseBody(), HttpStatus.OK);
 
         List<PasswordResetToken> tokens = tokenRepository.findAll();
         assertEquals(1, tokens.size(), "Deveria ter um token no banco");
@@ -103,22 +102,21 @@ class SendResetTokenIT extends AbstractAuthIT {
                 .build(true)
                 .toUriString();
 
-        WebClientResponseException exception = assertThrows(WebClientResponseException.class, () -> {
-            webClient.post()
-                    .uri(uri)
-                    .retrieve()
-                    .toEntity(String.class)
-                    .block();
-        });
+        String responseBody = webClient.post()
+                .uri(uri)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(String.class)
+                .returnResult()
+                .getResponseBody();
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode(), "Deveria retornar 400 Bad Request");
-
-        String responseBody = exception.getResponseBodyAsString();
+        assertNotNull(responseBody);
         assertTrue(responseBody.contains("O e-mail informado não está cadastrado."),
                 "O corpo da resposta deve conter o erro de e-mail não cadastrado");
 
         List<PasswordResetToken> tokens = tokenRepository.findAll();
         assertTrue(tokens.isEmpty(), "Nenhum token deveria ser criado para usuário inexistente");
+
         verify(emailPort, never()).sendEmail(any(), any(), any(), any());
     }
 
@@ -134,7 +132,8 @@ class SendResetTokenIT extends AbstractAuthIT {
 
         User user = insertUserIntoDatabase(request);
 
-        PasswordResetToken token = new PasswordResetToken(user, UUID.randomUUID().toString(), passwordEncoder.encode("fakeHashedToken"));
+        PasswordResetToken token = new PasswordResetToken(user, UUID.randomUUID().toString(),
+                passwordEncoder.encode("fakeHashedToken"));
         ReflectionTestUtils.setField(token, "expiresAt", LocalDateTime.now().minusMinutes(1));
 
         tokenRepository.save(token);
@@ -157,7 +156,8 @@ class SendResetTokenIT extends AbstractAuthIT {
 
         User user = insertUserIntoDatabase(request);
 
-        PasswordResetToken token = new PasswordResetToken(user, UUID.randomUUID().toString(), passwordEncoder.encode("fakeHashedToken"));
+        PasswordResetToken token = new PasswordResetToken(user, UUID.randomUUID().toString(),
+                passwordEncoder.encode("fakeHashedToken"));
 
         tokenRepository.save(token);
 

@@ -2,8 +2,10 @@ package com.ednaldoluiz.websocket.v1.integration.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.ednaldoluiz.websocket.v1.integration.config.TestContainerDatabaseConfig;
+import com.ednaldoluiz.websocket.v1.shared.base.AbstractAuthTest;
+import com.ednaldoluiz.websocket.v1.shared.helpers.ApiRequestHelper;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,17 +13,20 @@ import org.springframework.http.*;
 
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.RegisterResponse;
+import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
+import com.ednaldoluiz.websocket.infra.web.handler.FieldErrorResponse;
 import com.ednaldoluiz.websocket.infra.web.route.Paths;
-import com.ednaldoluiz.websocket.v1.integration.base.AbstractAuthIT;
+import com.ednaldoluiz.websocket.v1.config.TestContainerDatabaseConfig;
 
 @Tag("auth")
-@SuppressWarnings("null")
+@SuppressWarnings({"null", "unchecked", "rawtypes"})
 @ExtendWith({TestContainerDatabaseConfig.class})
-class RegisterUserIT extends AbstractAuthIT {
+class RegisterIT extends AbstractAuthTest {
 
     private final String URI = Paths.V1.Auth.AUTH + Paths.Auth.REGISTER;
 
     @Test
+    @Order(1)
     @DisplayName("Deve registrar um usuário com sucesso")
     void testRegisterUser_Successful() {
 
@@ -32,7 +37,7 @@ class RegisterUserIT extends AbstractAuthIT {
                 "Test User",
                 true);
 
-        ResponseEntity<RegisterResponse> response = doPost(URI, webClient, request, RegisterResponse.class);
+        ResponseEntity<RegisterResponse> response = (ResponseEntity) ApiRequestHelper.doPost(URI, webClient, request, RegisterResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isNotNull();
@@ -41,6 +46,7 @@ class RegisterUserIT extends AbstractAuthIT {
     }
 
     @Test
+    @Order(2)
     @DisplayName("Deve falhar ao registrar um usuário com email já cadastrado")
     void testRegisterUser_EmailAlreadyExists() {
 
@@ -60,13 +66,14 @@ class RegisterUserIT extends AbstractAuthIT {
                 "Novo Usuário",
                 true);
 
-        ResponseEntity<String> response = doPost(URI, webClient, request, String.class);
+        ResponseEntity<ErrorResponse> response = (ResponseEntity) ApiRequestHelper.doPost(URI, webClient, request, ErrorResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).contains("Já existe um usuário com este email.");
+        assertThat(response.getBody().error()).contains("Já existe um usuário com este email.");
     }
 
     @Test
+    @Order(3)
     @DisplayName("Deve falhar ao registrar um usuário com vários erros simultâneos")
     void testRegisterUser_MultipleErrors_01() {
         RegisterRequest request = new RegisterRequest(
@@ -76,17 +83,21 @@ class RegisterUserIT extends AbstractAuthIT {
                 "A",
                 false);
 
-        ResponseEntity<String> response = doPost(URI, webClient, request, String.class);
+        ResponseEntity<ErrorResponse> response = (ResponseEntity) ApiRequestHelper.doPost(URI, webClient, request, ErrorResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody())
-                .contains("O email informado é inválido.")
-                .contains("A senha não pode estar em branco.")
-                .contains("O nome deve ter entre 3 e 50 caracteres.")
-                .contains("Os termos de uso devem ser aceitos para prosseguir.");
+        assertThat(response.getBody().fieldErrors())
+            .extracting(FieldErrorResponse::message)
+            .contains(
+                "O email informado é inválido.",
+                "A senha não pode estar em branco.",
+                "O nome deve ter entre 3 e 50 caracteres.",
+                "Os termos de uso devem ser aceitos para prosseguir."
+            );
     }
 
     @Test
+    @Order(4)
     @DisplayName("Deve falhar ao registrar um usuário com senhas diferentes")
     void testRegisterUser_MultipleErrors_02() {
         RegisterRequest request = new RegisterRequest(
@@ -96,13 +107,14 @@ class RegisterUserIT extends AbstractAuthIT {
                 "Abc 123",
                 true);
 
-        ResponseEntity<String> response = doPost(URI, webClient, request, String.class);
+        ResponseEntity<ErrorResponse> response = (ResponseEntity) ApiRequestHelper.doPost(URI, webClient, request, ErrorResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).contains("As senhas não coincidem.");
+        assertThat(response.getBody().error()).contains("Senhas não conferem.");
     }
 
     @Test
+    @Order(5)
     @DisplayName("Deve falhar ao registrar um usuário com senha fraca, sem condições do PasswordPolicy")
     void testRegisterUser_MultipleErrors_03() {
         RegisterRequest request = new RegisterRequest(
@@ -112,10 +124,11 @@ class RegisterUserIT extends AbstractAuthIT {
                 "Weak User",
                 true);
 
-        ResponseEntity<String> response = doPost(URI, webClient, request, String.class);
+        ResponseEntity<ErrorResponse> response = (ResponseEntity) ApiRequestHelper.doPost(URI, webClient, request, ErrorResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody())
+        assertThat(response.getBody().fieldErrors())
+        .extracting(FieldErrorResponse::message)
                 .contains("Deve conter pelo menos 1 caractere maiúsculo.")
                 .contains("Deve conter pelo menos 1 dígito.")
                 .contains("Deve conter pelo menos 1 caractere especial.");
