@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import com.ednaldoluiz.websocket.web.handler.error.ErrorResponse;
+import com.ednaldoluiz.websocket.infra.web.handler.error.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
