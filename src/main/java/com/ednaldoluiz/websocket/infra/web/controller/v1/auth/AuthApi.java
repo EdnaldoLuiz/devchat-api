@@ -13,10 +13,9 @@ import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.ResetPasswordRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.GeneratedPasswordResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.LoginResponse;
-import com.ednaldoluiz.websocket.app.v1.auth.dto.response.LogoutResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.RegisterResponse;
 import com.ednaldoluiz.websocket.infra.web.controller.common.GenericApiResponse;
-import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
+import com.ednaldoluiz.websocket.infra.web.handler.error.ErrorResponse;
 import com.ednaldoluiz.websocket.infra.web.route.Paths;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -141,7 +140,7 @@ public interface AuthApi {
         @ApiResponse(responseCode = "200", description = "Logout realizado com sucesso.", content = {
             @Content(
                 mediaType = MediaType.APPLICATION_JSON_VALUE,
-                schema = @Schema(implementation = LogoutResponse.class)
+                schema = @Schema(implementation = GenericApiResponse.class)
             )
         }),
         @ApiResponse(responseCode = "401", description = "Usuário não autenticado.", content = {
@@ -151,7 +150,7 @@ public interface AuthApi {
             )
         })
     })
-    ResponseEntity<LogoutResponse> logout();
+    ResponseEntity<GenericApiResponse> logout();
 
     /**
      * Endpoint para solicitar a redefinição de senha.
@@ -163,7 +162,7 @@ public interface AuthApi {
     @Operation(summary = AuthDocs.ForgotPassword.SUMMARY, description = AuthDocs.ForgotPassword.DESCRIPTION)
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Se o email existir, um email de redefinição será enviado."),
-        @ApiResponse(responseCode = "400", description = "Erro ao processar solicitação."),
+        @ApiResponse(responseCode = "404", description = "Erro ao processar solicitação."),
     })
     ResponseEntity<GenericApiResponse> forgotPassword(@RequestParam String email);
 

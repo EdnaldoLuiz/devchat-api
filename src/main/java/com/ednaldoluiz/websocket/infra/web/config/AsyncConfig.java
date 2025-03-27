@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.web.config;
+package com.ednaldoluiz.websocket.web.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

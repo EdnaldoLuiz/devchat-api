@@ -11,7 +11,6 @@ import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.ResetPasswordRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.GeneratedPasswordResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.LoginResponse;
-import com.ednaldoluiz.websocket.app.v1.auth.dto.response.LogoutResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.RegisterResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.facade.AuthFacade;
 import com.ednaldoluiz.websocket.infra.web.controller.common.GenericApiResponse;
@@ -41,8 +40,8 @@ public class AuthController implements AuthApi {
     }
 
     @Override
-    public ResponseEntity<LogoutResponse> logout() {
-        return ResponseEntity.ok(LogoutResponse.success());
+    public ResponseEntity<GenericApiResponse> logout() {
+        return ResponseEntity.ok(new GenericApiResponse("Logout realizado com sucesso."));
     }
 
     @Override

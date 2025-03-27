@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.web.config;
+package com.ednaldoluiz.websocket.web.config;
 
 import java.util.ArrayList;
 import java.util.List;

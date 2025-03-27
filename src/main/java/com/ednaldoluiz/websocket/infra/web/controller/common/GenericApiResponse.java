@@ -1,6 +1,8 @@
 package com.ednaldoluiz.websocket.infra.web.controller.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 
@@ -10,7 +12,8 @@ public class GenericApiResponse {
 
     private final String message;
 
-    public GenericApiResponse(String message) {
+    @JsonCreator
+    public GenericApiResponse(@JsonProperty("message") String message) {
         this.message = message;
     }
 }
