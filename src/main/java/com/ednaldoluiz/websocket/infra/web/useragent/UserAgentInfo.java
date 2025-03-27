@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.domain.model.user;
+package com.ednaldoluiz.websocket.infra.web.useragent;
 
 import eu.bitwalker.useragentutils.Browser;
 import eu.bitwalker.useragentutils.DeviceType;
@@ -9,10 +9,10 @@ import lombok.Getter;
 @Getter
 public class UserAgentInfo {
 
-    private Browser browserName;
-    private String browserVersion;
-    private OperatingSystem operatingSystem;
-    private boolean isMobile;
+    private final Browser browserName;
+    private final String browserVersion;
+    private final OperatingSystem operatingSystem;
+    private final boolean isMobile;
 
     public UserAgentInfo(UserAgent userAgent) {
         this.browserName = userAgent.getBrowser();
