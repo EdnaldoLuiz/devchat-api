@@ -4,7 +4,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
+import com.ednaldoluiz.websocket.infra.web.handler.error.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ApiRequestHelper {

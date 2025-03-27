@@ -15,7 +15,7 @@ import com.ednaldoluiz.websocket.domain.model.user.PasswordResetToken;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
 import com.ednaldoluiz.websocket.infra.web.controller.common.GenericApiResponse;
-import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
+import com.ednaldoluiz.websocket.infra.web.handler.error.ErrorResponse;
 import com.ednaldoluiz.websocket.infra.web.route.Paths;
 import com.ednaldoluiz.websocket.v1.bdd.steps.BaseSteps;
 import com.ednaldoluiz.websocket.v1.shared.helpers.ApiRequestHelper;

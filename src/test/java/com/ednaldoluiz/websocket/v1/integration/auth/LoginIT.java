@@ -18,7 +18,7 @@ import com.ednaldoluiz.websocket.app.v1.auth.dto.response.LoginResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.ednaldoluiz.websocket.infra.web.handler.ErrorResponse;
+import com.ednaldoluiz.websocket.infra.web.handler.error.ErrorResponse;
 import com.ednaldoluiz.websocket.infra.web.route.Paths;
 
 @Tag("auth")
