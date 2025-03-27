@@ -1,30 +1,11 @@
-package com.ednaldoluiz.websocket.v1.architecture;
+package com.ednaldoluiz.websocket.v1.architecture.layers;
 
-import com.tngtech.archunit.core.domain.JavaClasses;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.ednaldoluiz.websocket.v1.architecture.BaseArchitectureTest;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
-import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class DomainArchitectureTest {
-
-    private static JavaClasses importedClasses;
-
-    @BeforeAll
-    static void init() {
-        importedClasses = new ClassFileImporter()
-                .importPackages("com.ednaldoluiz.websocket");
-    }
-
-    @Test
-    void domainShouldNotUseSpringFramework() {
-        noClasses()
-                .that().resideInAPackage("..domain..")
-                .should().dependOnClassesThat().resideInAPackage("org.springframework..")
-                .check(importedClasses);
-    }
+public class DomainArchitectureTest extends BaseArchitectureTest {
 
     @Test
     void domainLayerShouldBeIndependent() {

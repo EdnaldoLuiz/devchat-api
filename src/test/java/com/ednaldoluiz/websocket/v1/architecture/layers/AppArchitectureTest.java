@@ -1,32 +1,20 @@
-package com.ednaldoluiz.websocket.v1.architecture;
+package com.ednaldoluiz.websocket.v1.architecture.layers;
 
-import com.ednaldoluiz.websocket.v1.shared.base.AbstractTestBase;
-import com.tngtech.archunit.core.domain.JavaClasses;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.ednaldoluiz.websocket.v1.architecture.BaseArchitectureTest;
+
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
-import com.tngtech.archunit.core.importer.ImportOption;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class AppArchitectureTest extends AbstractTestBase {
-
-    private static JavaClasses importedClasses;
-
-    @BeforeAll
-    static void init() {
-        importedClasses = new ClassFileImporter()
-                .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_TESTS)
-                .importPackages("com.ednaldoluiz.websocket");
-    }
+public class AppArchitectureTest extends BaseArchitectureTest {
 
     @Test
-    void appLayerShouldOnlyBeAccessedByWebAndInfra() {
-        layeredArchitecture()
-                .consideringAllDependencies()
-                .layer("App").definedBy("..app..")
-                .layer("Infra").definedBy("..infra..")
-                .whereLayer("App").mayOnlyBeAccessedByLayers("Infra")
+    void useCasesShouldResideInAppPackage() {
+        classes()
+                .that().haveSimpleNameEndingWith("UseCase")
+                .or().haveSimpleNameEndingWith("Facade")
+                .should().resideInAPackage("..app..")
                 .check(importedClasses);
     }
 }
