@@ -10,7 +10,7 @@ import com.ednaldoluiz.websocket.app.v1.auth.validator.AuthValidator;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
 import com.ednaldoluiz.websocket.infra.security.service.JwtService;
-import com.ednaldoluiz.websocket.infra.web.handler.exception.LoginValidationException;
+import com.ednaldoluiz.websocket.web.web.handler.exception.LoginValidationException;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

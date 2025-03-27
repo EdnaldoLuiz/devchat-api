@@ -11,9 +11,9 @@ import com.ednaldoluiz.websocket.domain.model.user.PasswordResetToken;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
-import com.ednaldoluiz.websocket.infra.web.handler.exception.InvalidTokenException;
-import com.ednaldoluiz.websocket.infra.web.handler.exception.MismatchedPasswordsException;
-import com.ednaldoluiz.websocket.infra.web.handler.exception.ResetPasswordUserNotFoundException;
+import com.ednaldoluiz.websocket.web.web.handler.exception.InvalidTokenException;
+import com.ednaldoluiz.websocket.web.web.handler.exception.MismatchedPasswordsException;
+import com.ednaldoluiz.websocket.web.web.handler.exception.ResetPasswordUserNotFoundException;
 
 @Slf4j
 @Component

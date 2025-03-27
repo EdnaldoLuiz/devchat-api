@@ -13,9 +13,9 @@ import org.springframework.http.*;
 
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.RegisterResponse;
-import com.ednaldoluiz.websocket.infra.web.handler.error.ErrorResponse;
-import com.ednaldoluiz.websocket.infra.web.handler.error.FieldErrorResponse;
-import com.ednaldoluiz.websocket.infra.web.route.Paths;
+import com.ednaldoluiz.websocket.web.web.handler.error.ErrorResponse;
+import com.ednaldoluiz.websocket.web.web.handler.error.FieldErrorResponse;
+import com.ednaldoluiz.websocket.web.web.route.Paths;
 import com.ednaldoluiz.websocket.v1.config.TestContainerDatabaseConfig;
 
 @Tag("auth")

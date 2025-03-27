@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 *.log
 TestController.java
+teste
 
 ### STS ###
 .apt_generated

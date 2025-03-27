@@ -1,8 +1,8 @@
 package com.ednaldoluiz.websocket.infra.security.policy;
 
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.GeneratedPasswordResponse;
-import com.ednaldoluiz.websocket.infra.web.handler.error.FieldErrorResponse;
-import com.ednaldoluiz.websocket.infra.web.handler.exception.PasswordValidationException;
+import com.ednaldoluiz.websocket.web.web.handler.error.FieldErrorResponse;
+import com.ednaldoluiz.websocket.web.web.handler.exception.PasswordValidationException;
 import org.passay.*;
 import org.passay.dictionary.ArrayWordList;
 import org.passay.dictionary.WordListDictionary;

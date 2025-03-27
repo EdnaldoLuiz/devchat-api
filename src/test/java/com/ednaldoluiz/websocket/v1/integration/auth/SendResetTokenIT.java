@@ -5,7 +5,7 @@ import com.ednaldoluiz.websocket.domain.model.user.PasswordResetToken;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.domain.port.EmailPort;
 import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
-import com.ednaldoluiz.websocket.infra.web.route.Paths;
+import com.ednaldoluiz.websocket.web.web.route.Paths;
 import com.ednaldoluiz.websocket.v1.config.TestContainerDatabaseConfig;
 import com.ednaldoluiz.websocket.v1.shared.base.AbstractAuthTest;
 

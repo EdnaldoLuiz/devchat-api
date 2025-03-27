@@ -14,7 +14,7 @@ import com.ednaldoluiz.websocket.domain.port.EmailPort;
 import com.ednaldoluiz.websocket.infra.aws.ses.EmailTemplateService;
 import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
-import com.ednaldoluiz.websocket.infra.web.handler.exception.EmailNotRegisteredException;
+import com.ednaldoluiz.websocket.web.web.handler.exception.EmailNotRegisteredException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
