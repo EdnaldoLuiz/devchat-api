@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
 import com.ednaldoluiz.websocket.domain.model.chat.Chat;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -28,10 +27,9 @@ public class Message extends EntityBase {
 
     @OneToOne(
         mappedBy = "message", 
-        cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE }, 
-        fetch = FetchType.LAZY
+        cascade = { CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REMOVE }
     )
-    @JsonManagedReference
+    //@JsonManagedReference
     private MessageText messageText;
 
     @ManyToOne(fetch = FetchType.LAZY)

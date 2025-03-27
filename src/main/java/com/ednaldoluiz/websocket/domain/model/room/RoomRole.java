@@ -1,7 +1,5 @@
 package com.ednaldoluiz.websocket.domain.model.room;
 
-import com.ednaldoluiz.websocket.shared.utils.EnumUtils;
-
 import lombok.Getter;
 
 /**
@@ -28,7 +26,15 @@ public enum RoomRole {
     }
 
     public static RoomRole fromString(String role) {
-        return EnumUtils.fromString(RoomRole.class, role, MEMBER);
+        if (role == null || role.isBlank()) {
+            return MEMBER;
+        }
+        for (RoomRole r : values()) {
+            if (r.toString().equalsIgnoreCase(role)) {
+                return r;
+            }
+        }
+        return MEMBER;
     }
 
     /**

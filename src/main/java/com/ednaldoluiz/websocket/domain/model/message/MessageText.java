@@ -3,8 +3,6 @@ package com.ednaldoluiz.websocket.domain.model.message;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -27,7 +25,7 @@ public class MessageText implements Serializable {
     @OneToOne
     @MapsId
     @JoinColumn(name = "message_id")
-    @JsonBackReference
+    //@JsonBackReference
     private Message message;
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")

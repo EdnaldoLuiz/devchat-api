@@ -13,7 +13,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ForeignKey;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -21,7 +20,9 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -34,10 +35,8 @@ import lombok.Setter;
         @UniqueConstraint(name = "uk_users_rooms_user_room", columnNames = { "user_id", "room_id" })
     }
 )
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UsersRooms extends EntityBase {
-
-    @Id
-    private Long id;
 
     @ManyToOne(
         fetch = FetchType.LAZY, 
