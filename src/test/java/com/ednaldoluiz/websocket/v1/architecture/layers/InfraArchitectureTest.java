@@ -1,21 +1,11 @@
-package com.ednaldoluiz.websocket.v1.architecture;
+package com.ednaldoluiz.websocket.v1.architecture.layers;
 
-import com.tngtech.archunit.core.domain.JavaClasses;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
-import org.junit.jupiter.api.BeforeAll;
+import com.ednaldoluiz.websocket.v1.architecture.BaseArchitectureTest;
 import org.junit.jupiter.api.Test;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 
-public class InfraArchitectureTest {
-
-    private static JavaClasses importedClasses;
-
-    @BeforeAll
-    static void init() {
-        importedClasses = new ClassFileImporter()
-                .importPackages("com.ednaldoluiz.websocket");
-    }
+public class InfraArchitectureTestTest extends BaseArchitectureTest {
 
     @Test
     void controllersShouldBeInWebControllerPackage() {

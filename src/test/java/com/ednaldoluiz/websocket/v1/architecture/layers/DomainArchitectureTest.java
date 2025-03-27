@@ -19,6 +19,14 @@ public class DomainArchitectureTest {
     }
 
     @Test
+    void domainShouldNotUseSpringFramework() {
+        noClasses()
+                .that().resideInAPackage("..domain..")
+                .should().dependOnClassesThat().resideInAPackage("org.springframework..")
+                .check(importedClasses);
+    }
+
+    @Test
     void domainLayerShouldBeIndependent() {
         noClasses()
                 .that().resideInAPackage("..domain..")

@@ -1,22 +1,14 @@
-package com.ednaldoluiz.websocket.v1.architecture;
+package com.ednaldoluiz.websocket.v1.architecture.global;
 
-import com.tngtech.archunit.core.domain.JavaClasses;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
+import com.ednaldoluiz.websocket.v1.architecture.BaseArchitectureTest;
 import com.tngtech.archunit.library.Architectures;
 import com.tngtech.archunit.library.dependencies.SlicesRuleDefinition;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class GlobalArchitectureTest {
+import com.tngtech.archunit.lang.syntax.ArchRuleDefinition;
 
-    private static JavaClasses importedClasses;
-
-    @BeforeAll
-    static void init() {
-        importedClasses = new ClassFileImporter()
-                .importPackages("com.ednaldoluiz.websocket");
-    }
+public class GlobalArchitectureTest extends BaseArchitectureTest {
 
     @Test
     void shouldNotHaveCycles() {
@@ -38,9 +30,18 @@ public class GlobalArchitectureTest {
 
             .whereLayer("Web").mayNotBeAccessedByAnyLayer()
             .whereLayer("App").mayOnlyBeAccessedByLayers("Web")
-            .whereLayer("Domain").mayOnlyBeAccessedByLayers("App", "Domain")
+            .whereLayer("Domain").mayOnlyBeAccessedByLayers("App", "Domain", "Infra")
             .whereLayer("Infra").mayOnlyBeAccessedByLayers("App", "Infra")
 
             .check(importedClasses);
+    }
+
+    @Test
+    void testClassesShouldOnlyExistInTestPackage() {
+        ArchRuleDefinition.noClasses()
+                .that().haveSimpleNameContaining("Test")
+                .should().resideOutsideOfPackage("..test..")
+                .allowEmptyShould(true)
+                .check(importedClasses);
     }
 }
