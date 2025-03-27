@@ -1,11 +1,10 @@
-package com.ednaldoluiz.websocket.app.v1.auth.usecase.strategy.provider;
+package com.ednaldoluiz.websocket.app.v1.auth.usecase.strategy;
 
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.OAuth2UserInfoRequest;
-import com.ednaldoluiz.websocket.app.v1.auth.usecase.strategy.OAuth2ProviderStrategy;
 
 @Component
 public class GitHubProviderStrategy implements OAuth2ProviderStrategy {

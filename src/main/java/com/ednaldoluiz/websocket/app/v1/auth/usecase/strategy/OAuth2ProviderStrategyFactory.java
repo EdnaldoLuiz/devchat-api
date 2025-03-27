@@ -5,8 +5,6 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.ednaldoluiz.websocket.app.v1.auth.usecase.strategy.provider.GitHubProviderStrategy;
-import com.ednaldoluiz.websocket.app.v1.auth.usecase.strategy.provider.GoogleProviderStrategy;
 import com.ednaldoluiz.websocket.domain.model.user.AuthProvider;
 
 @Component
