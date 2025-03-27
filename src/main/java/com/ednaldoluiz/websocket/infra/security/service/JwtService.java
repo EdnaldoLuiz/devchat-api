@@ -27,11 +27,11 @@ import com.ednaldoluiz.websocket.domain.model.user.User;
 @RequiredArgsConstructor
 public class JwtService {
 
-    @Value("${application.security.jwt.secret-key}")
+    @Value("${application.security.jwt.secret-key:test12345678901234567890123456789012}")
     private String secretKey;
-    @Value("${application.security.jwt.expiration}")
+    @Value("${application.security.jwt.expiration:3600000}")
     private long jwtExpiration;
-    @Value("${application.security.jwt.refresh-token.expiration}")
+    @Value("${application.security.jwt.refresh-token.expiration:86400000}")
     private long refreshExpiration;
 
     private final TokenService tokenService;
