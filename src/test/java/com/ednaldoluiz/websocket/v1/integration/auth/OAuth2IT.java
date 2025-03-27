@@ -18,8 +18,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.LoginRequest;
 import com.ednaldoluiz.websocket.domain.model.user.AuthProvider;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.web.web.handler.error.ErrorResponse;
-import com.ednaldoluiz.websocket.web.web.route.Paths;
+import com.ednaldoluiz.websocket.web.handler.error.ErrorResponse;
+import com.ednaldoluiz.websocket.web.route.Paths;
 
 import reactor.netty.http.client.HttpClient;
 

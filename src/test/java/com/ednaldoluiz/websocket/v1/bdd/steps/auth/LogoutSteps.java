@@ -2,8 +2,8 @@ package com.ednaldoluiz.websocket.v1.bdd.steps.auth;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.ednaldoluiz.websocket.web.web.controller.common.GenericApiResponse;
-import com.ednaldoluiz.websocket.web.web.route.Paths;
+import com.ednaldoluiz.websocket.web.controller.common.GenericApiResponse;
+import com.ednaldoluiz.websocket.web.route.Paths;
 import com.ednaldoluiz.websocket.v1.bdd.steps.BaseSteps;
 import com.ednaldoluiz.websocket.v1.shared.helpers.ApiRequestHelper;
 import io.cucumber.java.en.Given;

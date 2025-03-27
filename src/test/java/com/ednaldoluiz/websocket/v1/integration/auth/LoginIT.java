@@ -18,8 +18,8 @@ import com.ednaldoluiz.websocket.app.v1.auth.dto.response.LoginResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.ednaldoluiz.websocket.web.web.handler.error.ErrorResponse;
-import com.ednaldoluiz.websocket.web.web.route.Paths;
+import com.ednaldoluiz.websocket.web.handler.error.ErrorResponse;
+import com.ednaldoluiz.websocket.web.route.Paths;
 
 @Tag("auth")
 @SuppressWarnings({"null", "unchecked"})

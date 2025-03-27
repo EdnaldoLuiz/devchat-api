@@ -11,7 +11,7 @@ import io.cucumber.java.en.When;
 
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.LoginRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.LoginResponse;
-import com.ednaldoluiz.websocket.web.web.route.Paths;
+import com.ednaldoluiz.websocket.web.route.Paths;
 import com.ednaldoluiz.websocket.v1.bdd.steps.BaseSteps;
 import com.ednaldoluiz.websocket.v1.shared.helpers.ApiRequestHelper;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;

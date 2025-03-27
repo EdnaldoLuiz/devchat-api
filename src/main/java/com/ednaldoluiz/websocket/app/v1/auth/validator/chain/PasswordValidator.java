@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.validator.AuthValidator;
 import com.ednaldoluiz.websocket.infra.security.policy.PasswordPolicy;
-import com.ednaldoluiz.websocket.web.web.handler.exception.MismatchedPasswordsException;
+import com.ednaldoluiz.websocket.web.handler.exception.MismatchedPasswordsException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
