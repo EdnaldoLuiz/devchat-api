@@ -1,5 +1,7 @@
 package com.ednaldoluiz.websocket.infra.web.handler;
 
+import com.ednaldoluiz.websocket.infra.web.handler.error.ErrorResponse;
+import com.ednaldoluiz.websocket.infra.web.handler.error.FieldErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 

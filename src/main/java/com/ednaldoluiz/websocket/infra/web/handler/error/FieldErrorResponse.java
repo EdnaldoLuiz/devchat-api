@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.web.handler;
+package com.ednaldoluiz.websocket.infra.web.handler.error;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

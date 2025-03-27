@@ -1,6 +1,6 @@
 package com.ednaldoluiz.websocket.infra.web.handler.exception;
 
-import com.ednaldoluiz.websocket.infra.web.handler.FieldErrorResponse;
+import com.ednaldoluiz.websocket.infra.web.handler.error.FieldErrorResponse;
 
 import lombok.Getter;
 
