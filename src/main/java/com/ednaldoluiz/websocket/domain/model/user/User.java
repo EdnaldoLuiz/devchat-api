@@ -15,7 +15,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.ednaldoluiz.websocket.domain.model.base.TimestampedEntityBase;
-import com.ednaldoluiz.websocket.domain.model.room.UsersRooms;
 
 @Getter
 @Entity
@@ -60,15 +59,6 @@ public class User extends TimestampedEntityBase implements UserDetails {
     @Column(name = "auth_provider", nullable = false)
     @Enumerated(EnumType.STRING)
     private AuthProvider authProvider = AuthProvider.EMAIL_PASSWORD;
-
-    @Transient
-    private UserStatus status = UserStatus.OFFLINE;
-
-    @Transient
-    private UserAgentInfo userAgentInfo;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private Set<UsersRooms> userRooms;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PasswordResetToken> passwordResetTokens;

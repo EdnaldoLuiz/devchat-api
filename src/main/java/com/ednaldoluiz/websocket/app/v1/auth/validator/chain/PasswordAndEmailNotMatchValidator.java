@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.LoginRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.validator.AuthValidator;
 import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
-import com.ednaldoluiz.websocket.infra.web.handler.exception.LoginValidationException;
+import com.ednaldoluiz.websocket.web.handler.exception.LoginValidationException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
