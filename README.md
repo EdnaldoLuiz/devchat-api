@@ -1,8 +1,8 @@
 <h1 align=center>DevChat-Api</h1>
 
-## **🖥️ Tech Stack**
+## *🖥️ Tech Stack*
 
-### **👨‍💻 Technologies**
+### *👨‍💻 Technologies*
 
 <table align="center" width=1000px>
     <thead>
@@ -40,7 +40,7 @@
 
 ---
 
-### **🛠️ Development Tools**
+### *🛠️ Development Tools*
 
 <table align="center" width=1000px>
     <thead>
@@ -75,7 +75,7 @@
 
 ---
 
-### **☁️ Cloud Services**
+### *☁️ Cloud Services*
 
 <table align="center" width=1000px>
     <thead>
@@ -96,20 +96,30 @@
 
 ---
 
-### **🧪 Testing & QA**
+### *🧪 Testing & QA*
 
 <table align="center" width=1000px>
     <thead>
         <tr>
             <th><img src="https://skills-icons.vercel.app/api/icons?i=swagger" width=100px height=100px/></th>
+            <th><img src="https://skills-icons.vercel.app/api/icons?i=cucumber" width=100px height=100px/></th>
+            <th><img src="https://skills-icons.vercel.app/api/icons?i=junit5" width=100px height=100px/></th>
+        </tr>
+            <th><img src="https://skills-icons.vercel.app/api/icons?i=testcontainers" width=100px height=100px/></th>
         </tr>
     </thead>
     <tbody align="center">
         <tr>
             <td>Swagger</td>
+            <td>Cucumber</td>
+            <td>JUnit</td>
+            <td>TestContainers</td>
         </tr>
         <tr>
-            <td>🔖 2.8.5</td>
+            <td>🔖 2.8.5 </td>
+            <td>🔖 7.21.1 </td>
+            <td>🔖 5 </td>
+            <td>🔖 - </td>
         </tr>
     </tbody>
 </table>
