@@ -3,7 +3,6 @@ package com.ednaldoluiz.websocket.v1.architecture.global;
 import com.ednaldoluiz.websocket.v1.architecture.BaseArchitectureTest;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaPackage;
-import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.library.metrics.ArchitectureMetrics;
 import com.tngtech.archunit.library.metrics.ComponentDependencyMetrics;
 import com.tngtech.archunit.library.metrics.LakosMetrics;

@@ -3,7 +3,6 @@ package com.ednaldoluiz.websocket.v1.architecture.layers;
 import com.ednaldoluiz.websocket.v1.architecture.BaseArchitectureTest;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
-import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 
 import org.junit.jupiter.api.Test;
 
