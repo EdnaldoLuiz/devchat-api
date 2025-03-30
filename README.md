@@ -104,7 +104,7 @@
             <th><img src="https://skills-icons.vercel.app/api/icons?i=swagger" width=100px height=100px/></th>
             <th><img src="https://skills-icons.vercel.app/api/icons?i=cucumber" width=100px height=100px/></th>
             <th><img src="https://skills-icons.vercel.app/api/icons?i=junit5" width=100px height=100px/></th>
-        </tr>
+            <th><img src="https://skills-icons.vercel.app/api/icons?i=archunit" width=100px height=100px/></th>
             <th><img src="https://skills-icons.vercel.app/api/icons?i=testcontainers" width=100px height=100px/></th>
         </tr>
     </thead>
@@ -113,13 +113,15 @@
             <td>Swagger</td>
             <td>Cucumber</td>
             <td>JUnit</td>
+            <td>ArchUnit</td>
             <td>TestContainers</td>
         </tr>
         <tr>
             <td>🔖 2.8.5 </td>
             <td>🔖 7.21.1 </td>
             <td>🔖 5 </td>
-            <td>🔖 - </td>
+            <td>🔖 1.4.0 </td>
+            <td>🔖 1.20.4 </td>
         </tr>
     </tbody>
 </table>
