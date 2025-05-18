@@ -1,5 +1,8 @@
 package com.ednaldoluiz.websocket.web.config;
 
+import com.ednaldoluiz.websocket.web.websocket.interceptor.JwtChannelInterceptor;
+import com.ednaldoluiz.websocket.web.websocket.interceptor.JwtHandshakeInterceptor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
@@ -19,16 +22,21 @@ import lombok.experimental.FieldDefaults;
 
 @Configuration
 @RequiredArgsConstructor
-@FieldDefaults(makeFinal = true, level = lombok.AccessLevel.PRIVATE)
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    StompCommandInterceptor stompCommandInterceptor;
+    final StompCommandInterceptor stompCommandInterceptor;
+    final JwtHandshakeInterceptor jwtHandshakeInterceptor;
+    final JwtChannelInterceptor jwtChannelInterceptor;
 
-    static long[] HEARTBEAT = new long[] { 10000, 10000 };
+    @Value("${app.cors.allowed-origins}")
+    private String[] allowed;
+
+    static long HEARTBEAT = 10_000;
     static int MESSAGE_SIZE_LIMIT = 1024 * 1024;
     static int SEND_BUFFER_SIZE_LIMIT = 1024 * 1024;
-    static int SEND_TIME_LIMIT = 20000;
+    static int SEND_TIME_LIMIT = 20_000;
 
     /**
      * Registra o endpoint que os clientes usarão para se conectar via WebSocket.
@@ -36,11 +44,12 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      * JWT, se necessário.
      */
     @Override
-    public void registerStompEndpoints(@NonNull StompEndpointRegistry registry) {
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*")
-                .setAllowedOrigins("*") // Permite conexões de qualquer origem
-                .withSockJS(); // Habilita fallback para navegadores que não suportam WebSocket
+                .setAllowedOrigins(allowed)
+                .addInterceptors(jwtHandshakeInterceptor)
+                .withSockJS()
+                    .setSessionCookieNeeded(false);
     }
 
     /**
@@ -64,13 +73,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      * com @MessageMapping.
      */
     @Override
-    public void configureMessageBroker(@NonNull MessageBrokerRegistry config) {
+    public void configureMessageBroker(MessageBrokerRegistry config) {
         config
                 .setApplicationDestinationPrefixes("/app")
+                .setUserDestinationPrefix("/user")
                 .enableSimpleBroker("/topic", "/queue")
-                .setHeartbeatValue(HEARTBEAT) // Configura o intervalo de envio de mensagens de
-                .setTaskScheduler(heartBeatScheduler()); // Configura o agendador de tarefas para envio de mensagens de
+                .setTaskScheduler(heartBeatScheduler())
+                .setHeartbeatValue(new long[]{HEARTBEAT, HEARTBEAT});
     }
+
 
     /**
      * Configura o canal de entrada do cliente. Aqui, podemos adicionar interceptadores
@@ -79,7 +90,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(@NonNull ChannelRegistration registration) {
-        registration.interceptors(stompCommandInterceptor);
+        registration.interceptors(stompCommandInterceptor, jwtChannelInterceptor);
     }
 
     @Bean

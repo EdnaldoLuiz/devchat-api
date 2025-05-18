@@ -1,7 +1,9 @@
 package com.ednaldoluiz.websocket.infra.security.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -30,6 +32,10 @@ import com.ednaldoluiz.websocket.shared.constants.BeanConstants;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Configuration
@@ -80,11 +86,10 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http) throws Exception {
-        CorsConfiguration cors = corsConfiguration();
+    public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, CorsConfigurationSource corsSource) throws Exception {
         return http
                 .securityMatcher("/api/v1/auth/oauth2/**", "/login/oauth2/**", "/oauth2/authorization/**")
-                .cors(corsConfigurer -> corsConfigurer.configurationSource(request -> cors))
+                .cors(c -> c.configurationSource(corsSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/oauth2/**").permitAll()
@@ -123,13 +128,13 @@ public class SecurityConfig {
     // ===============================================================
     @Bean
     @Order(2)
-    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
-        CorsConfiguration cors = corsConfiguration();
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, CorsConfigurationSource corsSource) throws Exception {
         return http
                 .securityMatcher("/**")
-                .cors(corsConfigurer -> corsConfigurer.configurationSource(request -> cors))
+                .cors(c -> c.configurationSource(corsSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers(SWAGGER_URLS).permitAll()
                         .requestMatchers(AUTH_WHITELIST).permitAll()
                         .requestMatchers("/api/v1/auth/oauth2/**").permitAll() 
@@ -161,14 +166,21 @@ public class SecurityConfig {
                 .build();
     }
 
-    private CorsConfiguration corsConfiguration() {
-        CorsConfiguration cors = new CorsConfiguration();
-        cors.applyPermitDefaultValues();
-        cors.addAllowedMethod(HttpMethod.PUT);
-        cors.addAllowedMethod(HttpMethod.PATCH);
-        cors.addAllowedMethod(HttpMethod.GET);
-        cors.addAllowedMethod(HttpMethod.DELETE);
-        cors.addAllowedMethod(HttpMethod.POST);
-        return cors;
+    @Bean
+    @Primary
+    CorsConfigurationSource corsConfigurationSource(
+            @Value("${app.cors.allowed-origins}") String[] allowed) {
+
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOrigins(List.of(allowed));
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        cfg.setAllowedHeaders(List.of("*"));
+        cfg.setAllowCredentials(true);
+        cfg.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", cfg); // REST
+        source.registerCorsConfiguration("/ws/**",  cfg); // SockJS fallback
+        return source;
     }
 }

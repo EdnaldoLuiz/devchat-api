@@ -142,6 +142,7 @@ public interface AuthDocs {
 
         String STATUS_200_RESPONSE = """
             {
+                "id": 123456789
                 "email": "usuario@email.com",
                 "name": "Usuário",
                 "avatar": "https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50x",

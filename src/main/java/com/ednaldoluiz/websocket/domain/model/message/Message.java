@@ -1,6 +1,7 @@
 package com.ednaldoluiz.websocket.domain.model.message;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
 import com.ednaldoluiz.websocket.domain.model.chat.Chat;
@@ -18,6 +19,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 
 @Getter
 @Setter
@@ -42,6 +44,9 @@ public class Message extends EntityBase {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Column(name = "message_uuid", columnDefinition = "BINARY(16)", unique = true, updatable = false)
+    private UUID messageUuid;
 
     @Column(name = "deleted", nullable = false)
     private boolean deleted;

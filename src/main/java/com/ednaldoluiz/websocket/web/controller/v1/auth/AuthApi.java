@@ -86,7 +86,7 @@ public interface AuthApi {
         @ApiResponse(responseCode = "200", description = "Usuário autenticado com sucesso.", content = {
             @Content(
                 mediaType = MediaType.APPLICATION_JSON_VALUE, 
-                schema = @Schema(implementation = RegisterResponse.class),
+                schema = @Schema(implementation = LoginResponse.class),
                 examples = @ExampleObject(value = AuthDocs.Login.STATUS_200_RESPONSE)
             )
         }),

@@ -37,6 +37,6 @@ public class LoginUseCase {
         String refreshToken = jwtService.generateRefreshToken(user);
 
         log.info("User logged in: {} :)", user.getEmail());
-        return LoginResponse.from(user.getEmail(), user.getName(), user.getAvatar(), token, refreshToken);
+        return LoginResponse.from(user.getId(), user.getEmail(), user.getName(), user.getAvatar(), token, refreshToken);
     }
 }

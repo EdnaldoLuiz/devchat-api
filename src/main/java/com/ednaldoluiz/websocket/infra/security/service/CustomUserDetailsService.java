@@ -1,6 +1,9 @@
 package com.ednaldoluiz.websocket.infra.security.service;
 
+import com.ednaldoluiz.websocket.web.websocket.store.AuthUser;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -10,6 +13,7 @@ import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -23,10 +27,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    @Cacheable(cacheNames = "userDetailsCache", key = "#username")
-    public User loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository
-            .findByEmail(username)
-            .orElseThrow(() -> new UsernameNotFoundException("Credentials is not valid"));
+    //@Cacheable(cacheNames = "userDetailsCache", key = "#username")
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User entity = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Credenciais inválidas"));
+        log.info("Load user by username: {}, id {}", username, entity.getId());
+        return new AuthUser(entity);
     }
 }

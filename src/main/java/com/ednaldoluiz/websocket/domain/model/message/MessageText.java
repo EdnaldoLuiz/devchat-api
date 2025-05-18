@@ -3,6 +3,7 @@ package com.ednaldoluiz.websocket.domain.model.message;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import com.ednaldoluiz.websocket.domain.model.base.EntityBase;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -17,10 +18,7 @@ import lombok.Setter;
 @Setter
 @Entity(name = "MessageText")
 @Table(name = "message_texts", schema = "websocket")
-public class MessageText implements Serializable { 
-
-    @Id
-    private Long messageId;
+public class MessageText extends EntityBase {
 
     @OneToOne
     @MapsId
