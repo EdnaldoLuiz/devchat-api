@@ -1,61 +1,64 @@
+networks:
+  chat-net:
+
+volumes:
+  db_data:
+
 services:
 
-  ########### Websocket API
-
-  # api:
-  #   restart: unless-stopped
-  #   env_file:
-  #     - path: .env
-  #       required: true
-  #   build:
-  #     context: .
-  #     dockerfile: ./docker/api/Dockerfile
-  #   container_name: websocket_api
-  #   ports:
-  #     - "8081:${SERVER_PORT}"
-  #   environment:
-  #     - DB_HOST=${DB_HOST}
-  #     - DB_PORT=${DB_PORT}
-  #     - DB_NAME=${DB_NAME}
-  #     - DB_USERNAME=${DB_USERNAME}
-  #     - DB_PASSWORD=${DB_PASSWORD}
-  #     - SNOWFLAKE_DATACENTER_ID=${SNOWFLAKE_DATACENTER_ID}
-  #     - SNOWFLAKE_MACHINE_ID=${SNOWFLAKE_MACHINE_ID}
-  #     - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-
-  ########### Database
-
-  # db:
-  #   restart: always
-  #   env_file:
-  #     - path: .env
-  #       required: true
-  #   build:
-  #     context: ./docker/db
-  #     dockerfile: Dockerfile
-  #   healthcheck:
-  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 10
-  #   container_name: websocket_db
-  #   ports:
-  #     - "3308:${DB_PORT}"
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-  #     MYSQL_DATABASE: ${DB_NAME}
-  #     MYSQL_USER: ${DB_USERNAME}
-  #     MYSQL_PASSWORD: ${DB_PASSWORD}
-
-  localstack:
-    image: localstack/localstack
+  ############ MySQL ############
+  db:
+    build:
+      context: ./docker/db
+      dockerfile: Dockerfile
+    container_name: websocket_db
     ports:
-      - "4566:4566"
-      - "4571:4571"
+      - "3308:3306"            # host:container
     environment:
-      - SERVICES=ses
-      - DEFAULT_REGION=sa-east-1
-      - DATA_DIR=/tmp/localstack/data
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: websocket
+      MYSQL_USER: websocket_user
+      MYSQL_PASSWORD: 06022003
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p06022003"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - db_data:/var/lib/mysql
+    networks: [ chat-net ]
+
+  ############ Redis (sessions / cache / presença) ############
+
+  redis:
+    image: redis:8-alpine
+    container_name: websocket_redis
+    ports:
+      - "6379:6379"
+    networks: [ chat-net ]
+
+  ############ Spring Boot API ############
+  api:
+    build:
+      context: .
+      dockerfile: ./docker/api/Dockerfile
+    container_name: websocket_api
+    depends_on:
+      db:       { condition: service_healthy }
+      redis:    { condition: service_started }
+    env_file:
+      - .env               # mantém secrets externos (AWS, OAuth, etc.)
+    environment:
+      # sobrescreve apenas o que é local
+      SPRING_PROFILES_ACTIVE: docker
+      SERVER_PORT: 8080
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: websocket
+      DB_USERNAME: websocket_user
+      DB_PASSWORD: 06022003
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "8081:8080"         # host -> container
+    networks: [ chat-net ]
