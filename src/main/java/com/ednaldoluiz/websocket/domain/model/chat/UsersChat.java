@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.UniqueConstraint;
+import lombok.Getter;
 import lombok.Setter;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -19,6 +20,7 @@ import jakarta.persistence.Table;
  * Representa a relação entre usuários e chats.
  * Armazena o estado do chat para o usuário (ativo, arquivado, bloqueado, etc.).
  */
+@Getter
 @Setter
 @Entity
 @Table(

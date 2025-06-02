@@ -40,4 +40,9 @@ public class MessageAttachments extends EntityBase {
     @Column(name = "attachment_data", columnDefinition = "MEDIUMBLOB")
     private byte[] attachmentData;
 
+    public MessageAttachments(Message message, MessageAttachmentType attachmentType, String url) {
+        this.message = message;
+        this.attachmentType = attachmentType;
+        this.url = url;
+    }
 }
