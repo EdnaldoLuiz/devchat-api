@@ -1,37 +1,25 @@
 package com.ednaldoluiz.websocket.web.controller.v1.chat;
 
-import com.ednaldoluiz.websocket.domain.model.chat.Chat;
-import com.ednaldoluiz.websocket.domain.model.chat.ChatType;
-import com.ednaldoluiz.websocket.domain.model.chat.UsersChat;
-import com.ednaldoluiz.websocket.domain.model.chat.ChatStatus;
-import com.ednaldoluiz.websocket.domain.model.message.Message;
-import com.ednaldoluiz.websocket.domain.model.message.MessageText;
-import com.ednaldoluiz.websocket.domain.model.message.MessageStatus;
-import com.ednaldoluiz.websocket.domain.model.message.MessageStatusType;
+import com.ednaldoluiz.websocket.domain.model.chat.*;
+import com.ednaldoluiz.websocket.domain.model.message.*;
+import com.ednaldoluiz.websocket.domain.model.notification.NotificationType;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.ChatRepository;
-import com.ednaldoluiz.websocket.infra.persistence.MessageRepository;
-import com.ednaldoluiz.websocket.infra.persistence.MessageTextRepository;
-import com.ednaldoluiz.websocket.infra.persistence.MessageStatusRepository;
-import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
-import com.ednaldoluiz.websocket.infra.persistence.UsersChatsRepository;
-import com.ednaldoluiz.websocket.web.controller.v1.chat.ChatMessage;
+import com.ednaldoluiz.websocket.infra.persistence.*;
 import com.ednaldoluiz.websocket.web.websocket.store.AuthUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Controller
@@ -39,111 +27,227 @@ import java.util.Optional;
 public class ChatController {
 
     private final SimpMessagingTemplate template;
-    private final UserRepository userRepo;
-    private final ChatRepository chatRepo;
-    private final UsersChatsRepository ucRepo;
-    private final MessageRepository msgRepo;
+    private final UserRepository        userRepo;
+    private final ChatRepository        chatRepo;
+    private final UsersChatsRepository  ucRepo;
+    private final MessageRepository     msgRepo;
     private final MessageTextRepository textRepo;
     private final MessageStatusRepository statusRepo;
 
-    /**
-     * Envia mensagem privada de um usuário para outro.
-     */
-    @MessageMapping("/chat.private.{toEmail}")
+    /* ------------------------------------------------------------------ *
+     * 1) MENSAGEM PRIVADA (/chat.private.{toEmail})
+     * ------------------------------------------------------------------ */
+    @MessageMapping("/chat.privates.{toEmail}")
     @Transactional
-    public void direct(
+    public void handlePrivateMessage(
             @DestinationVariable String toEmail,
             ChatMessage msgDto,
             Principal principal
     ) {
-        // 1) Extrai usuário autenticado
-        AuthUser authUser = (AuthUser) ((org.springframework.security.core.Authentication) principal).getPrincipal();
-        log.info("Usuário autenticado: {}", authUser);
-
-        // 2) Carrega entidades User (evita proxy hibernado desconectado)
-        User fromUser = userRepo.findById(authUser.id())
-                .orElseThrow(() -> new IllegalArgumentException("Remetente não encontrado"));
-        User toUser = userRepo.findByEmail(toEmail)
+        log.info(">>> TYPING to /user/queue/typing for {}", toEmail);
+        AuthUser auth = auth(principal);
+        User fromUser = userEntity(auth.id());
+        User toUser   = userRepo.findByEmail(toEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Destinatário não encontrado"));
 
-        // 3) Busca ou cria Chat PRIVATE entre os dois
-        List<Long> ids = Arrays.asList(fromUser.getId(), toUser.getId());
-        Collections.sort(ids);
-        Chat chat = chatRepo.findPrivateBetween(ids.get(0), ids.get(1))
-                .orElseGet(() -> createPrivateChat(fromUser, toUser));
+        Chat chat = getOrCreatePrivateChat(fromUser, toUser);
 
-        // 4) Persiste a mensagem
+        /* persiste message ------------------------------------------------ */
         Message message = new Message();
         message.setChat(chat);
         message.setUser(fromUser);
-        message.setMessageUuid(msgDto.getMessageUuid());
+        message.setMessageUuid(msgDto.messageUuid());
         message.setSentAt(LocalDateTime.now());
-        message.setDeleted(false);
-        message = msgRepo.save(message);
+        msgRepo.save(message);
 
-        // 5) Persiste o texto da mensagem
-        MessageText mt = new MessageText();
-        mt.setMessage(message);
-        mt.setContent(msgDto.getContent());
-        textRepo.save(mt);
+        MessageText text = new MessageText();
+        text.setMessage(message);
+        text.setContent(msgDto.content());
+        textRepo.save(text);
 
-        // 6) Status para remetente: DELIVERED
-        MessageStatus stFrom = new MessageStatus();
-        stFrom.setMessage(message);
-        stFrom.setUser(fromUser);
-        stFrom.setStatus(MessageStatusType.DELIVERED);
-        stFrom.setTimestamp(LocalDateTime.now());
-        statusRepo.save(stFrom);
+        saveStatus(message, fromUser, MessageStatusType.DELIVERED);
+        saveStatus(message, toUser,   MessageStatusType.PENDING);
 
-        // 7) Status para destinatário: PENDING
-        MessageStatus stTo = new MessageStatus();
-        stTo.setMessage(message);
-        stTo.setUser(toUser);
-        stTo.setStatus(MessageStatusType.PENDING);
-        stTo.setTimestamp(LocalDateTime.now());
-        statusRepo.save(stTo);
+        ChatMessage out = new ChatMessage(
+                message.getId().toString(),
+                chat.getId().toString(),
+                msgDto.messageUuid(),
+                fromUser.getEmail(),
+                toUser.getEmail(),
+                msgDto.content(),
+                msgDto.type(),
+                message.getSentAt().atZone(ZoneOffset.UTC).toInstant().toEpochMilli()
+        );
 
-        // 8) Monta DTO de saída e envia
-        ChatMessage out = new ChatMessage();
-        out.setId(message.getId().toString());
-        out.setChatId(chat.getId().toString());
-        out.setSenderEmail(fromUser.getEmail());
-        out.setMessageUuid(message.getMessageUuid());
-        out.setRecipientEmail(toUser.getEmail());
-        out.setContent(msgDto.getContent());
-        out.setType(msgDto.getType());
-        long epochMillis = message.getSentAt()
-                .atZone(ZoneOffset.UTC)
-                .toInstant()
-                .toEpochMilli();
-        out.setTimestamp(epochMillis);
-
-        template.convertAndSendToUser(fromUser.getEmail(), "/queue/messages", out);
-        template.convertAndSendToUser(toUser.getEmail(),    "/queue/messages", out);
-
-        log.info("Mensagem de {} para {} enviada (chat {})", fromUser.getEmail(), toUser.getEmail(), chat.getId());
+        sendToUsers(out, fromUser.getEmail(), toUser.getEmail());
+        log.info("MSG {} -> {} (chat {})", fromUser.getEmail(), toUser.getEmail(), chat.getId());
     }
 
-    /**
-     * Cria um chat privado e vincula os usuários.
-     */
-    private Chat createPrivateChat(User a, User b) {
-        Chat c = new Chat();
-        c.setType(ChatType.PRIVATE);
-        c.setName(String.format("Chat privado: %s & %s", a.getName(), b.getName()));
-        c = chatRepo.save(c);
 
-        UsersChat ucA = new UsersChat();
-        ucA.setChat(c);
-        ucA.setUser(a);
-        ucA.setStatus(ChatStatus.ACTIVE);
+    /* ------------------------------------------------------------------ *
+     * 3) LIDO (/chat.read.{chatId})
+     * ------------------------------------------------------------------ */
+    @MessageMapping("/chat.read.{chatId}")
+    @Transactional
+    public void handleReadReceipt(
+            @DestinationVariable Long chatId,
+            ReadReceiptDto receipt,
+            Principal principal
+    ) {
+        User reader = userEntity(auth(principal).id());
 
-        UsersChat ucB = new UsersChat();
-        ucB.setChat(c);
-        ucB.setUser(b);
-        ucB.setStatus(ChatStatus.ACTIVE);
+        // marca todas as pendentes como READ para esse usuário
+        statusRepo.markChatMessagesAsRead(
+                chatId,
+                reader.getId(),
+                LocalDateTime.now(),
+                MessageStatusType.DELIVERED,
+                MessageStatusType.READ
+        );
 
-        ucRepo.saveAll(Arrays.asList(ucA, ucB));
-        return c;
+        template.convertAndSendToUser(
+                receipt.otherEmail(),
+                "/queue/read",
+                receipt
+        );
+        log.debug("READ chat:{} by {}", chatId, reader.getEmail());
     }
+
+    /* ------------------------------------------------------------------ *
+     * 4) NOTIFICAÇÕES PUSH (/chat.notify)
+     * ------------------------------------------------------------------ */
+    @MessageMapping("/chat.notify")
+    public void handleNotification(NotificationDto dto, Principal principal) {
+        // broadcast genérico – hoje só loga
+        template.convertAndSendToUser(dto.toEmail(), "/queue/notify", dto);
+        log.debug("NOTIFY {} -> {}", auth(principal).email(), dto.toEmail());
+    }
+
+    /* ------------------------------------------------------------------ *
+     * 5) MENSAGEM DE ARQUIVO (/chat.file.{toEmail})
+     *    (aqui só faz broadcast; upload real continua num endpoint REST)
+     * ------------------------------------------------------------------ */
+    @MessageMapping("/chat.file.{toEmail}")
+    public void handleFileMessage(
+            @DestinationVariable String toEmail,
+            FileMessageDto dto,
+            Principal principal
+    ) {
+        template.convertAndSendToUser(toEmail, "/queue/files", dto);
+        template.convertAndSendToUser(auth(principal).email(), "/queue/files", dto);
+        log.info("FILE {} -> {} ({})", auth(principal).email(), toEmail, dto.fileName());
+    }
+
+    @MessageMapping("/chat.typings.{to}")
+    public void typing(
+        @DestinationVariable String to,
+        @Payload Map<String,String> body
+    ){
+        template.convertAndSendToUser(to, "/queue/typing", body);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * 6) PRESENÇA ONLINE (/chat.presence.{chatId})
+     * ------------------------------------------------------------------ */
+    @MessageMapping("/chat.presence.{chatId}")
+    public void handlePresence(
+            @DestinationVariable Long chatId,
+            PresenceEventDto dto,
+            Principal principal
+    ) {
+        // envia para todos do chat exceto o remetente
+        chatRepo.membersEmails(chatId).stream()
+                .filter(email -> !email.equals(dto.email()))
+                .forEach(email -> template.convertAndSendToUser(email, "/queue/presence", dto));
+
+        log.debug("PRESENCE {} in chat {}", dto.status(), chatId);
+    }
+
+    /* ================================================================== *
+     * ---------------------- HELPERS / UTIL ----------------------------- *
+     * ================================================================== */
+    private AuthUser auth(Principal p) {
+        return (AuthUser) ((Authentication) p).getPrincipal();
+    }
+    private User userEntity(Long id) {
+        return userRepo.findById(id).orElseThrow();
+    }
+    private void sendToUsers(Object payload, String... emails) {
+        for (String email : emails) {
+            template.convertAndSendToUser(email, "/queue/messages", payload);
+        }
+    }
+    private void saveStatus(Message m, User u, MessageStatusType type) {
+        MessageStatus st = new MessageStatus();
+        st.setMessage(m);
+        st.setUser(u);
+        st.setStatus(type);
+        st.setTimestamp(LocalDateTime.now());
+        statusRepo.save(st);
+    }
+    private Chat getOrCreatePrivateChat(User a, User b) {
+        List<Long> ids = Arrays.asList(a.getId(), b.getId());
+        Collections.sort(ids);
+        return chatRepo.findPrivateBetween(ids.get(0), ids.get(1))
+                .orElseGet(() -> {
+                    Chat c = new Chat();
+                    c.setType(ChatType.PRIVATE);
+                    c.setName(a.getName() + " & " + b.getName());
+                    chatRepo.save(c);
+                    ucRepo.saveAll(List.of(
+                            usersChat(c, a), usersChat(c, b)
+                    ));
+                    return c;
+                });
+    }
+    private UsersChat usersChat(Chat c, User u) {
+        UsersChat uc = new UsersChat();
+        uc.setChat(c);
+        uc.setUser(u);
+        uc.setStatus(ChatStatus.ACTIVE);
+        return uc;
+    }
+
+    /* ================================================================== *
+     * ---------------------------  DTOs  -------------------------------- *
+     * ================================================================== */
+    // 📩 conteúdo de texto
+
+    // ✍️ typing
+    public record TypingEvent(
+            String fromEmail,
+            String toEmail
+    ) {}
+
+    // 📬 recibo de leitura
+    public record ReadReceiptDto(
+            String chatId,
+            String otherEmail,
+            long   lastMessageTimestamp
+    ) {}
+
+    // 📢 notificações genéricas
+    public record NotificationDto(
+            String toEmail,
+            NotificationType type,
+            String fromEmail
+    ) {}
+
+    // 📥 mensagem de arquivo (só metadados)
+    public record FileMessageDto(
+            String fileUuid,
+            String senderEmail,
+            String recipientEmail,
+            String fileName,
+            long   sizeBytes,
+            String mimeType,
+            long   timestamp
+    ) {}
+
+    // 🧍 presença
+    public record PresenceEventDto(
+            String email,
+            String status   // e.g. ONLINE, OFFLINE, AWAY
+    ) {}
 }
+ 

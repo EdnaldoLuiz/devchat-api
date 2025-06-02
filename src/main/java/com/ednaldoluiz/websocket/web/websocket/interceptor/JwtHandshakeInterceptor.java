@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -27,41 +29,63 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(
-            ServerHttpRequest request,
+            @NonNull ServerHttpRequest request,
             @NonNull ServerHttpResponse response,
             @NonNull WebSocketHandler wsHandler,
             @NonNull Map<String, Object> attrs
     ) {
+        return extractUserFromRequest(request)
+                .filter(user -> jwtService.isTokenValid(getRawToken(request), user))
+                .map(user -> createAuthentication(user, attrs))
+                .isPresent();
+    }
 
-        String auth = request.getHeaders().getFirst("Authorization");
-        log.info("JWT auth: {}", auth);
-        if (auth == null) {
-            String raw = UriComponentsBuilder.fromUri(request.getURI())
-                    .build()
-                    .getQueryParams()
-                    .getFirst("access_token");
-            log.info("JWT raw: {}", raw);
-            if (raw != null) auth = "Bearer " + raw;
+    private Optional<UserDetails> extractUserFromRequest(ServerHttpRequest request) {
+        return extractUsername(getRawToken(request))
+                .map(uds::loadUserByUsername);
+    }
+
+    private String getRawToken(ServerHttpRequest request) {
+        return extractTokenHeader(request)
+                .or(() -> extractTokenQueryParam(request))
+                .map(this::stripBearerPrefix)
+                .orElseThrow(() -> new AuthenticationCredentialsNotFoundException("Token inválido"));
+    }
+
+    private Optional<String> extractTokenHeader(ServerHttpRequest request) {
+        return Optional.ofNullable(request.getHeaders().getFirst("Authorization"))
+                .filter(auth -> !auth.isBlank());
+    }
+
+    private Optional<String> extractTokenQueryParam(ServerHttpRequest request) {
+        return Optional.ofNullable(
+                UriComponentsBuilder.fromUri(request.getURI())
+                        .build()
+                        .getQueryParams()
+                        .getFirst("access_token")
+        );
+    }
+
+    private String stripBearerPrefix(String token) {
+        return token.startsWith("Bearer ") ? token.substring(7) : token;
+    }
+
+    private Optional<String> extractUsername(String token) {
+        try {
+            return Optional.ofNullable(jwtService.extractUsername(token));
+        } catch (Exception e) {
+            log.warn("Falha ao extrair username do token", e);
+            return Optional.empty();
         }
+    }
 
-        if (auth == null || !auth.startsWith("Bearer ")) return false;
-
-        String token = auth.substring(7);
-        String username = jwtService.extractUsername(token);
-        log.info("Username: {}", username);
-        if (username == null) return false;
-
-        UserDetails user = uds.loadUserByUsername(username);
-        log.info("User: {}", user);
-        if (!jwtService.isTokenValid(token, user)) return false;
-
-        // salva no contexto + attrs (usado depois no Principal)
-        UsernamePasswordAuthenticationToken authentication =
+    private Optional<UserDetails> createAuthentication(UserDetails user, Map<String, Object> attrs) {
+        UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        attrs.put("user", authentication);               // importante para convertAndSendToUser
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        attrs.put("user", auth);
         log.info("Autenticação definida no handshake: {}", user.getUsername());
-        return true;
+        return Optional.of(user);
     }
 
     @Override

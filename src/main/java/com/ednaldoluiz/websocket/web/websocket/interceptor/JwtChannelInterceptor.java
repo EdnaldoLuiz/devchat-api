@@ -17,72 +17,113 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+import java.util.Optional;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtChannelInterceptor implements ChannelInterceptor {
 
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String SESSION_USER_KEY = "user";
+
     private final JwtService jwtService;
     private final CustomUserDetailsService uds;
-    private static final String BEARER_PREFIX = "Bearer ";
 
     @Override
     public Message<?> preSend(@NonNull Message<?> message, @NonNull MessageChannel channel) {
-        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        if (accessor == null) return message;
+        StompHeaderAccessor accessor = getAccessor(message);
+        if (accessor == null) {
+            log.debug("Sem accessor STOMP — pulando autenticação");
+            return message;
+        }
+        log.debug("Interceptando STOMP command={}", accessor.getCommand());
 
-        log.info("Interceptando STOMP: {}", accessor.getCommand());
-        log.info("Headers: {}", accessor.toNativeHeaderMap());
-
-        // Tenta autenticar via header (funciona para websocket puro)
-        if (StompCommand.CONNECT.equals(accessor.getCommand()) || StompCommand.SEND.equals(accessor.getCommand())) {
-            String token = accessor.getFirstNativeHeader("Authorization");
-            if (token == null) {
-                token = accessor.getFirstNativeHeader("access_token");
-                if (token != null && !token.startsWith(BEARER_PREFIX)) token = BEARER_PREFIX + token;
-            }
-
-            if (token != null && token.startsWith(BEARER_PREFIX)) {
-                token = token.substring(BEARER_PREFIX.length());
-                String username = jwtService.extractUsername(token);
-                log.info("Token extraído: {}", token);
-                log.info("Usuário do token: {}", username);
-
-                if (username != null) {
-                    AuthUser user = (AuthUser) uds.loadUserByUsername(username);
-                    if (jwtService.isTokenValid(token, user)) {
-                        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                        log.info("Auth: {}", auth);
-                        accessor.setUser(auth);
-                        SecurityContextHolder.getContext().setAuthentication(auth); // Define no contexto
-
-                        log.info("Authentication setado no accessor com sucesso: {}", user.getUsername());
-                    } else {
-                        log.warn("Token inválido para user {}", username);
-                    }
-                } else {
-                    log.warn("Username extraído foi null");
-                }
-            }
+        if (isConnectOrSend(accessor)) {
+            tryAuthenticateViaToken(accessor);
         }
 
-        // Se não conseguiu pelo header, tenta pegar dos session attributes (gambiarra obrigatória pro SockJS)
-        if (accessor.getUser() == null && accessor.getSessionAttributes() != null) {
-            Object obj = accessor.getSessionAttributes().get("user");
-            if (obj instanceof Authentication) {
-                accessor.setUser((Authentication) obj);
-                log.info("Authentication recuperado dos session attributes: {}", ((Authentication) obj).getName());
-            } else {
-                log.warn("Session attribute 'user' não encontrado ou não é Authentication. Valor: {}", obj);
-            }
-        }
-
-        // Última checagem pra garantir
         if (accessor.getUser() == null) {
-            log.warn("Nenhum principal foi associado à mensagem STOMP. Assegure-se de que o handshake salvou 'user' na sessão!");
+            tryAuthenticateViaSession(accessor);
+        }
+
+        if (accessor.getUser() == null) {
+            log.warn("Nenhum principal associado à mensagem STOMP (command={})", accessor.getCommand());
+        } else {
+            log.debug("Principal final associado: {}", accessor.getUser().getName());
         }
 
         return message;
     }
 
+    private StompHeaderAccessor getAccessor(Message<?> message) {
+        return MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+    }
+
+    private boolean isConnectOrSend(StompHeaderAccessor accessor) {
+        StompCommand cmd = accessor.getCommand();
+        return StompCommand.CONNECT.equals(cmd) || StompCommand.SEND.equals(cmd);
+    }
+
+    private void tryAuthenticateViaToken(StompHeaderAccessor accessor) {
+        extractBearerToken(accessor)
+                .flatMap(this::extractUsername)
+                .flatMap(this::loadUserDetails)
+                .filter(user -> validateToken(accessor, user))
+                .ifPresent(user -> setAuthentication(accessor, user));
+    }
+
+    private Optional<String> extractBearerToken(StompHeaderAccessor accessor) {
+        return Optional.ofNullable(accessor.getFirstNativeHeader("Authorization"))
+                .or(() -> Optional.ofNullable(accessor.getFirstNativeHeader("access_token"))
+                        .map(token -> BEARER_PREFIX + token))
+                .filter(token -> token.startsWith(BEARER_PREFIX))
+                .map(token -> token.substring(BEARER_PREFIX.length()));
+    }
+
+    private Optional<String> extractUsername(String rawToken) {
+        String username = jwtService.extractUsername(rawToken);
+        log.info("Username do token: {}", username);
+        return Optional.ofNullable(username);
+    }
+
+    private Optional<AuthUser> loadUserDetails(String username) {
+        try {
+            AuthUser user = (AuthUser) uds.loadUserByUsername(username);
+            log.debug("UserDetails carregado: id={}, email={}", user.id(), user.email());
+            return Optional.of(user);
+        } catch (Exception e) {
+            log.warn("Falha ao carregar UserDetails para '{}': {}", username, e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private boolean validateToken(StompHeaderAccessor accessor, AuthUser user) {
+        String rawToken = Objects.requireNonNull(accessor.getFirstNativeHeader("Authorization")).substring(BEARER_PREFIX.length());
+        boolean valid = jwtService.isTokenValid(rawToken, user);
+        if (!valid) {
+            log.warn("Token inválido para user {}", user.email());
+        }
+        return valid;
+    }
+
+    private void setAuthentication(StompHeaderAccessor accessor, AuthUser user) {
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+        accessor.setUser(auth);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        log.info("Autenticação via token aplicada — user={}", user.email());
+    }
+
+    private void tryAuthenticateViaSession(StompHeaderAccessor accessor) {
+        Optional.ofNullable(accessor.getSessionAttributes())
+                .map(session -> session.get(SESSION_USER_KEY))
+                .filter(Authentication.class::isInstance)
+                .map(Authentication.class::cast)
+                .ifPresent(auth -> {
+                    accessor.setUser(auth);
+                    log.info("Autenticação recuperada da sessão — user={}", auth.getName());
+                });
+    }
 }
