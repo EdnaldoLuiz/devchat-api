@@ -22,9 +22,10 @@ public interface UserRepository extends BaseRepository<User> {
 
     @Query("""
       select new com.ednaldoluiz.websocket.web.controller.v1.chat.UserSummary(
-        u.email, u.email, u.avatar
+        u.id, u.email, u.name, u.avatar
       )
       from User u
+      where u.deleted = false
     """)
     List<UserSummary> findAllProjectedBy();
     

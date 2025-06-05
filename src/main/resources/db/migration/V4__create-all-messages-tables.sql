@@ -2,6 +2,7 @@ CREATE TABLE messages (
     id BIGINT PRIMARY KEY,
     chat_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
+    message_uuid BINARY(16) UNIQUE NULL,
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (chat_id) REFERENCES chats(id),
