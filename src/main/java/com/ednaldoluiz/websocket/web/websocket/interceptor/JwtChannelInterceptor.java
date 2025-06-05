@@ -103,17 +103,17 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
         String rawToken = Objects.requireNonNull(accessor.getFirstNativeHeader("Authorization")).substring(BEARER_PREFIX.length());
         boolean valid = jwtService.isTokenValid(rawToken, user);
         if (!valid) {
-            log.warn("Token inválido para user {}", user.email());
+            log.warn("Token inválido para user {}", user.id());
         }
         return valid;
     }
 
     private void setAuthentication(StompHeaderAccessor accessor, AuthUser user) {
         UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                new UsernamePasswordAuthenticationToken(user.id().toString(), null, user.getAuthorities());
         accessor.setUser(auth);
         SecurityContextHolder.getContext().setAuthentication(auth);
-        log.info("Autenticação via token aplicada — user={}", user.email());
+        log.info("Autenticação via token aplicada — user={}", user.id());
     }
 
     private void tryAuthenticateViaSession(StompHeaderAccessor accessor) {

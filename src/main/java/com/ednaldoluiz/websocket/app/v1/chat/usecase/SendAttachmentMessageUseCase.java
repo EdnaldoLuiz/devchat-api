@@ -60,7 +60,7 @@ public class SendAttachmentMessageUseCase {
         ChatMessageResponse out = ChatMessageResponse.from(
             msg,
             msg.getMessageText(),
-            to.getEmail(),
+            to.getId(),
             Optional.of(attachment)
         );
 

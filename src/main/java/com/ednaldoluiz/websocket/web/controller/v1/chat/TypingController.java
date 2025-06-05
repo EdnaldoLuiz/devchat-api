@@ -15,12 +15,12 @@ public class TypingController {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/chat.typing.{to}")
+    @MessageMapping("/chat.typing.{toUserId}")
     public void typing(
-        @DestinationVariable String to,
+        @DestinationVariable String toUserId,
         @Payload Map<String,String> body
     ){
-        messagingTemplate.convertAndSendToUser(to, "/queue/typing", body);
+        messagingTemplate.convertAndSendToUser(toUserId, "/queue/typing", body);
     }
 
 }

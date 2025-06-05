@@ -7,7 +7,7 @@ import com.ednaldoluiz.websocket.domain.model.message.MessageAttachmentType;
 public record AttachmentMessageCommand (
 
     UUID                  messageUuid,
-    String                toEmail,
+    Long                  toUserId,
     String                content,
     MessageAttachmentType type,
     String                url

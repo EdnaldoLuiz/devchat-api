@@ -5,7 +5,7 @@ import java.util.UUID;
 public record TextMessageCommand (
 
     UUID   messageUuid,
-    String toEmail,
+    Long toUserId,
     String content
     
 ) implements SendMessageCommand {}

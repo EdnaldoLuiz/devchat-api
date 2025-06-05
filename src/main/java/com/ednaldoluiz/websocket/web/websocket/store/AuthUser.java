@@ -6,14 +6,19 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record AuthUser(Long id, String email, String name, String password, Set<Role> roles)
-        implements UserDetails, Serializable {
+public record AuthUser(
+
+        Long id, 
+        String email, 
+        String name, 
+        String password, 
+        Set<Role> roles
+        
+    ) implements UserDetails {
 
     public AuthUser(User entity) {
         this(entity.getId(), entity.getEmail(), entity.getName(), entity.getPassword(), entity.getRoles());
@@ -35,6 +40,4 @@ public record AuthUser(Long id, String email, String name, String password, Set<
     public String getUsername() {
         return email;
     }
-
-    // implemente métodos de UserDetails delegando a 'roles' ou retornando true
 }

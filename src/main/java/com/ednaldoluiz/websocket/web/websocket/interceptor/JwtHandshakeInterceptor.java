@@ -2,6 +2,8 @@ package com.ednaldoluiz.websocket.web.websocket.interceptor;
 
 import com.ednaldoluiz.websocket.infra.security.service.CustomUserDetailsService;
 import com.ednaldoluiz.websocket.infra.security.service.JwtService;
+import com.ednaldoluiz.websocket.web.websocket.store.AuthUser;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
@@ -32,8 +34,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             @NonNull ServerHttpRequest request,
             @NonNull ServerHttpResponse response,
             @NonNull WebSocketHandler wsHandler,
-            @NonNull Map<String, Object> attrs
-    ) {
+            @NonNull Map<String, Object> attrs) {
         return extractUserFromRequest(request)
                 .filter(user -> jwtService.isTokenValid(getRawToken(request), user))
                 .map(user -> createAuthentication(user, attrs))
@@ -62,8 +63,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                 UriComponentsBuilder.fromUri(request.getURI())
                         .build()
                         .getQueryParams()
-                        .getFirst("access_token")
-        );
+                        .getFirst("access_token"));
     }
 
     private String stripBearerPrefix(String token) {
@@ -79,13 +79,26 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         }
     }
 
-    private Optional<UserDetails> createAuthentication(UserDetails user, Map<String, Object> attrs) {
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+    private Optional<UserDetails> createAuthentication(UserDetails userDetails, Map<String, Object> attrs) {
+        // 1) cast para AuthUser para termos acesso ao método id()
+        AuthUser authUser = (AuthUser) userDetails;
+
+        // 2) usamos o próprio ID como principal (string)
+        String userId = authUser.id().toString();
+
+        // 3) mantemos as authorities vindas do AuthUser
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                userId, // principal = id do usuário
+                null, // credentials (não precisamos aqui)
+                authUser.getAuthorities());
+
+        // 4) armazenamos o AuthUser completo em detalhes, caso precisemos dele mais
+        // tarde
+        auth.setDetails(authUser);
+
         SecurityContextHolder.getContext().setAuthentication(auth);
-        attrs.put("user", auth);
-        log.info("Autenticação definida no handshake: {}", user.getUsername());
-        return Optional.of(user);
+        log.info("Autenticação definida no handshake: userId={}", userId);
+        return Optional.of(userDetails);
     }
 
     @Override
@@ -93,8 +106,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             @NonNull ServerHttpRequest request,
             @NonNull ServerHttpResponse response,
             @NonNull WebSocketHandler wsHandler,
-            Exception ex)
-    {
+            Exception ex) {
         log.info("Handshake completed");
     }
 }

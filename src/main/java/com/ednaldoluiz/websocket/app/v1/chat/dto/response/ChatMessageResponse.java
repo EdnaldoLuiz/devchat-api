@@ -6,13 +6,23 @@ import com.ednaldoluiz.websocket.domain.model.message.Message;
 import com.ednaldoluiz.websocket.domain.model.message.MessageAttachmentType;
 import com.ednaldoluiz.websocket.domain.model.message.MessageAttachments;
 import com.ednaldoluiz.websocket.domain.model.message.MessageText;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 public record ChatMessageResponse(
+
+    @JsonSerialize(using = ToStringSerializer.class)
     Long id,
+    
     String chatId,
     String messageUuid,
-    String senderEmail,
-    String recipientEmail,
+
+    @JsonSerialize(using = ToStringSerializer.class)
+    Long senderId,
+
+    @JsonSerialize(using = ToStringSerializer.class)
+    Long recipientId,
+
     String content,
     Optional<MessageAttachmentType> type,
     long timestamp
@@ -21,22 +31,22 @@ public record ChatMessageResponse(
     public static ChatMessageResponse from(
         Message message,
         MessageText text,
-        String recipientEmail,
+        Long recipientId,
         Optional<MessageAttachments> maybeAttachment
     ) {
         return new ChatMessageResponse(
             message.getId(),
             String.valueOf(message.getChat().getId()),
             message.getMessageUuid().toString(),
-            message.getUser().getEmail(),
-            recipientEmail,
+            message.getUser().getId(),
+            recipientId,
             text.getContent(),
             maybeAttachment.map(MessageAttachments::getAttachmentType),
             message.getSentAt().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()
         );
     }
 
-    public static ChatMessageResponse from(Message message, MessageText text, String recipientEmail) {
-        return from(message, text, recipientEmail, Optional.empty());
+    public static ChatMessageResponse from(Message message, MessageText text, Long recipientId) {
+        return from(message, text, recipientId, Optional.empty());
     }
 }

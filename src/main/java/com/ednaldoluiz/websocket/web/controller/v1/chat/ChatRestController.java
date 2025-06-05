@@ -1,28 +1,37 @@
 package com.ednaldoluiz.websocket.web.controller.v1.chat;
 
+import java.util.List;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ednaldoluiz.websocket.app.v1.chat.dto.request.ChangeChatStatusRequest;
-import com.ednaldoluiz.websocket.app.v1.chat.dto.request.ChangeMessageStatusRequest;
 import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatHistoryResponse;
 import com.ednaldoluiz.websocket.app.v1.chat.facade.ChatFacade;
+import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
 import com.ednaldoluiz.websocket.web.websocket.store.AuthUser;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/chats")
 @RequiredArgsConstructor
 public class ChatRestController {
 
     private final ChatFacade chatFacade;
+    private final UserRepository repo;
+
+    @GetMapping("/users")
+    public List<UserSummary> list() {
+        List<UserSummary> lista = repo.findAllProjectedBy();
+        log.info("Listando usuários: {}", lista.size());
+        return lista;
+    }
 
     @GetMapping("/{chatId}/messages")
     public ChatHistoryResponse list(

@@ -34,9 +34,9 @@ public class MessageDomainService {
     @Transactional
     public void createStatuses(Message message, User from, User to) {
         save(from, message, MessageStatusType.DELIVERED);
-        log.info(">>> Message {} status DELIVERED for {}", message.getMessageUuid(), from.getEmail());
+        log.info(">>> Message {} status DELIVERED for {}", message.getMessageUuid(), from.getId());
         save(to, message, MessageStatusType.PENDING);
-        log.info(">>> Message {} status PENDING for {}", message.getMessageUuid(), to.getEmail());
+        log.info(">>> Message {} status PENDING for {}", message.getMessageUuid(), to.getId());
     }
 
     @Transactional
@@ -45,10 +45,10 @@ public class MessageDomainService {
     }
 
     public void broadcast(User from, User to, ChatMessageResponse dto) {
-        template.convertAndSendToUser(from.getEmail(), "/queue/messages", dto);
-        template.convertAndSendToUser(to.getEmail()  , "/queue/messages", dto);
+        template.convertAndSendToUser(from.getId().toString(), "/queue/messages", dto);
+        template.convertAndSendToUser(to.getId().toString()  , "/queue/messages", dto);
 
-        template.convertAndSendToUser(to.getEmail(), "/queue/notify",
-              new NotificationDto(to.getEmail(), NotificationType.MESSAGE, from.getEmail()));
+        template.convertAndSendToUser(to.getId().toString(), "/queue/notify",
+            new NotificationDto(to.getId().toString(), NotificationType.MESSAGE, from.getId().toString()));
     }
 }

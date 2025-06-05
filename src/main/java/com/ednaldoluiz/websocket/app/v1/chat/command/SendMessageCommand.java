@@ -17,6 +17,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public sealed interface SendMessageCommand permits TextMessageCommand, AttachmentMessageCommand {
 
     UUID messageUuid();
-    String toEmail();
-
+    Long toUserId();
+    
 }

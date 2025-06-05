@@ -96,11 +96,11 @@ public class ChatDomainService {
     public void broadcastAndNotify(
             User from, User to, Object payload, SimpMessagingTemplate template) {
 
-        template.convertAndSendToUser(from.getEmail(), "/queue/messages", payload);
-        template.convertAndSendToUser(to.getEmail(), "/queue/messages", payload);
+        template.convertAndSendToUser(from.getId().toString(), "/queue/messages", payload);
+        template.convertAndSendToUser(to.getId().toString(), "/queue/messages", payload);
 
-        template.convertAndSendToUser(to.getEmail(), "/queue/notify",
-                new NotificationDto(to.getEmail(), NotificationType.MESSAGE, from.getEmail())
+        template.convertAndSendToUser(to.getId().toString(), "/queue/notify",
+                new NotificationDto(to.getId().toString(), NotificationType.MESSAGE, from.getId().toString())
         );
     }
 }

@@ -18,8 +18,8 @@ public class ChatFacade {
     private final SendMessageUseCase sendMessageUseCase;
     private final ListChatMessageUseCase listChatUC;
 
-    public ChatMessageResponse send(AuthUser me, SendMessageCommand cmd, String toEmail) {
-        return sendMessageUseCase.execute(me, cmd, toEmail);
+    public ChatMessageResponse send(Long fromUserId, SendMessageCommand cmd, Long toId) {
+        return sendMessageUseCase.execute(fromUserId, cmd, toId);
     }
 
     public ChatHistoryResponse list(AuthUser auth, Long chatId, int page, int size) {

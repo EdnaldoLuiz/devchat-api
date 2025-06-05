@@ -21,8 +21,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ListChatMessageUseCase {
 
-    private final UsersChatsRepository  usersChatsRepo;
-    private final MessageRepository     messageRepo;
+    private final UsersChatsRepository usersChatsRepo;
+    private final MessageRepository messageRepo;
 
     @Transactional(readOnly = true)
     public ChatHistoryResponse execute(AuthUser auth, Long chatId, int page, int size) {
@@ -40,11 +40,11 @@ public class ListChatMessageUseCase {
         Page<Message> paged = messageRepo.findByChatIdFetchText(chatId, pageable);
 
         List<ChatMessageResponse> dtoList = paged.stream()
-            .map(m -> {
-                String recipient = getOtherEmail(chatId, auth.id());
-                return ChatMessageResponse.from(m, m.getMessageText(), recipient);
-            })
-            .toList();
+                .map(m -> {
+                    Long recipientId = getOtherId(chatId, auth.id());
+                    return ChatMessageResponse.from(m, m.getMessageText(), recipientId);
+                })
+                .toList();
 
         log.debug("HISTORY chat:{} user:{} page:{}/{}", chatId, auth.email(), page, paged.getTotalPages());
 
@@ -53,22 +53,20 @@ public class ListChatMessageUseCase {
                 page,
                 size,
                 paged.getTotalElements(),
-                dtoList
-        );
+                dtoList);
     }
 
-    private String getOtherEmail(Long chatId, Long myUserId) {
-    List<UsersChat> participantes = usersChatsRepo.findAllByChatId(chatId);
-    if (participantes.size() != 2) {
-        throw new IllegalStateException("Chat privado deve ter exatamente 2 participantes");
+    private Long getOtherId(Long chatId, Long myUserId) {
+        List<UsersChat> participantes = usersChatsRepo.findAllByChatId(chatId);
+        if (participantes.size() != 2) {
+            throw new IllegalStateException("Chat privado deve ter exatamente 2 participantes");
+        }
+
+        return participantes.stream()
+                .map(uc -> uc.getUser())
+                .filter(user -> !user.getId().equals(myUserId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Outro participante não encontrado"))
+                .getId();
     }
-
-    return participantes.stream()
-        .map(uc -> uc.getUser())
-        .filter(user -> !user.getId().equals(myUserId))
-        .findFirst()
-        .orElseThrow(() -> new IllegalStateException("Outro participante não encontrado"))
-        .getEmail();
-}
-
 }

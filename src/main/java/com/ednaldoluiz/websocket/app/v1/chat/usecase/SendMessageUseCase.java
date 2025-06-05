@@ -30,12 +30,12 @@ public class SendMessageUseCase {
     private final UserRepository        userRepository;
 
     @Transactional
-    public ChatMessageResponse execute(AuthUser auth, SendMessageCommand cmd, String toEmail) {
+    public ChatMessageResponse execute(Long fromUserId, SendMessageCommand cmd, Long toUserId) {
 
-        User from = userRepository.findById(auth.id()).orElseThrow();
-        log.info(">>> User {} enviando mensagem para {}", from.getEmail(), toEmail);
-        User to = userRepository.findByEmail(toEmail)
-            .orElseThrow(() -> new UsernameNotFoundException(cmd.toEmail()));
+        User from = userRepository.findById(fromUserId).orElseThrow();
+        log.info(">>> User {} enviando mensagem para {}", from.getEmail(), toUserId);
+        User to = userRepository.findById(toUserId)
+            .orElseThrow(() -> new UsernameNotFoundException(""));
 
         Chat chat = chatSvc.getOrCreatePrivateChat(from, to);
 
@@ -47,7 +47,7 @@ public class SendMessageUseCase {
         msgSvc.persist(message);
         msgSvc.createStatuses(message, from, to);
 
-        ChatMessageResponse dto = ChatMessageResponse.from(message, message.getMessageText(), to.getEmail());
+        ChatMessageResponse dto = ChatMessageResponse.from(message, message.getMessageText(), to.getId());
         msgSvc.broadcast(from, to, dto);
 
         return dto;
