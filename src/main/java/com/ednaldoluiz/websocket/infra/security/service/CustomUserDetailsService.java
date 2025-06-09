@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 

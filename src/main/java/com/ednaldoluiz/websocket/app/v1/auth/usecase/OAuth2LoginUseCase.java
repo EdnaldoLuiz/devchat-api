@@ -11,7 +11,7 @@ import com.ednaldoluiz.websocket.app.v1.auth.usecase.strategy.OAuth2ProviderStra
 import com.ednaldoluiz.websocket.app.v1.auth.usecase.strategy.OAuth2ProviderStrategyFactory;
 import com.ednaldoluiz.websocket.domain.model.user.AuthProvider;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.UserRepository;
 import com.ednaldoluiz.websocket.infra.security.service.JwtService;
 
 import lombok.RequiredArgsConstructor;

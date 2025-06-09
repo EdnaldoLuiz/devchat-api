@@ -1,6 +1,6 @@
 package com.ednaldoluiz.websocket.v1.architecture.layers;
 
-import com.ednaldoluiz.websocket.infra.persistence.BaseRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.BaseRepository;
 import com.ednaldoluiz.websocket.v1.architecture.BaseArchitectureTest;
 import org.junit.jupiter.api.Test;
 

@@ -15,10 +15,10 @@ import lombok.Getter;
 @Getter
 public enum MessageStatusType {
 
-    DELIVERED,
+    SENT,
     READ,
     DELETED,
     FAILED,
-    PENDING
+    DELIVERED
     
 }

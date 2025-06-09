@@ -8,7 +8,7 @@ import com.ednaldoluiz.websocket.app.v1.auth.dto.request.LoginRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.response.LoginResponse;
 import com.ednaldoluiz.websocket.app.v1.auth.validator.AuthValidator;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.UserRepository;
 import com.ednaldoluiz.websocket.infra.security.service.JwtService;
 import com.ednaldoluiz.websocket.web.handler.exception.LoginValidationException;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;

@@ -13,7 +13,7 @@ import io.cucumber.java.en.When;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.ResetPasswordRequest;
 import com.ednaldoluiz.websocket.domain.model.user.PasswordResetToken;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.PasswordResetTokenRepository;
 import com.ednaldoluiz.websocket.web.controller.common.GenericApiResponse;
 import com.ednaldoluiz.websocket.web.handler.error.ErrorResponse;
 import com.ednaldoluiz.websocket.web.route.Paths;

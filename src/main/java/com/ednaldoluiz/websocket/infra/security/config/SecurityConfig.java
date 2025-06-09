@@ -130,11 +130,11 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http, CorsConfigurationSource corsSource) throws Exception {
         return http
-                .securityMatcher("/**")
+                .securityMatcher("/api/**", "/ws/**")
                 .cors(c -> c.configurationSource(corsSource))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/ws", "/ws/**").permitAll()
                         .requestMatchers(SWAGGER_URLS).permitAll()
                         .requestMatchers(AUTH_WHITELIST).permitAll()
                         .requestMatchers("/api/v1/auth/oauth2/**").permitAll() 

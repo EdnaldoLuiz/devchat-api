@@ -4,7 +4,7 @@ import com.ednaldoluiz.websocket.domain.model.chat.*;
 import com.ednaldoluiz.websocket.domain.model.message.*;
 import com.ednaldoluiz.websocket.domain.model.notification.NotificationType;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.*;
+import com.ednaldoluiz.websocket.infra.persistence.repository.*;
 import com.ednaldoluiz.websocket.web.websocket.store.AuthUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -65,8 +65,8 @@ public class ChatController {
         text.setContent(msgDto.content());
         textRepo.save(text);
 
-        saveStatus(message, fromUser, MessageStatusType.DELIVERED);
-        saveStatus(message, toUser,   MessageStatusType.PENDING);
+        saveStatus(message, fromUser, MessageStatusType.SENT);
+        saveStatus(message, toUser,   MessageStatusType.DELIVERED);
 
         ChatMessage out = new ChatMessage(
                 message.getId().toString(),
@@ -101,7 +101,7 @@ public class ChatController {
                 chatId,
                 reader.getId(),
                 LocalDateTime.now(),
-                MessageStatusType.DELIVERED,
+                MessageStatusType.SENT,
                 MessageStatusType.READ
         );
 

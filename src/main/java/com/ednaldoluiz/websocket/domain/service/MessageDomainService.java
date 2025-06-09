@@ -10,8 +10,8 @@ import com.ednaldoluiz.websocket.domain.model.message.MessageStatus;
 import com.ednaldoluiz.websocket.domain.model.message.MessageStatusType;
 import com.ednaldoluiz.websocket.domain.model.notification.NotificationType;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.MessageRepository;
-import com.ednaldoluiz.websocket.infra.persistence.MessageStatusRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.MessageRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.MessageStatusRepository;
 import com.ednaldoluiz.websocket.web.controller.v1.chat.ChatController.NotificationDto;
 
 import lombok.RequiredArgsConstructor;
@@ -33,9 +33,9 @@ public class MessageDomainService {
 
     @Transactional
     public void createStatuses(Message message, User from, User to) {
-        save(from, message, MessageStatusType.DELIVERED);
+        save(from, message, MessageStatusType.SENT);
         log.info(">>> Message {} status DELIVERED for {}", message.getMessageUuid(), from.getId());
-        save(to, message, MessageStatusType.PENDING);
+        save(to, message, MessageStatusType.DELIVERED);
         log.info(">>> Message {} status PENDING for {}", message.getMessageUuid(), to.getId());
     }
 

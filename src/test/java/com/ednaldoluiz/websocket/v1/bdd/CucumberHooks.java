@@ -2,8 +2,8 @@ package com.ednaldoluiz.websocket.v1.bdd;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
-import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.PasswordResetTokenRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.UserRepository;
 
 import io.cucumber.java.Before;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +17,7 @@ public class CucumberHooks {
     @Autowired
     private PasswordResetTokenRepository tokenRepository;
 
-    @Before("@auth")
+    @Before("@/features/auth")
     public void limparBancoDeDadosAntesDoRegistro() {
         log.info("Limpando banco de dados...");
         userRepository.deleteAll();

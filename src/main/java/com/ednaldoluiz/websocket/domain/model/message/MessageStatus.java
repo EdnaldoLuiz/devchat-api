@@ -66,7 +66,7 @@ public class MessageStatus extends EntityBase {
     }
 
     public void markDelivered() {
-        this.status = MessageStatusType.DELIVERED;
+        this.status = MessageStatusType.SENT;
         this.timestamp = LocalDateTime.now();
     }
 }

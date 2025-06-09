@@ -5,7 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.UserRepository;
 
 public abstract class AbstractAuthTest extends AbstractApiTest {
 

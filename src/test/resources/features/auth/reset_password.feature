@@ -1,4 +1,4 @@
-@auth
+@/features/auth
 Feature: Reset de Senha
   Como um usuário do sistema
   Eu quero redefinir minha senha

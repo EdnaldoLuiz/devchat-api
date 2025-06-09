@@ -3,67 +3,58 @@ package com.ednaldoluiz.websocket.web.controller.v1.chat;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
+import com.ednaldoluiz.websocket.app.v1.chat.dto.request.StartChatRequest;
 import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatHistoryResponse;
+import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatSummaryResponse;
 import com.ednaldoluiz.websocket.app.v1.chat.facade.ChatFacade;
-import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
+import com.ednaldoluiz.websocket.app.v1.user.dto.response.UserSearchResponse;
+import com.ednaldoluiz.websocket.app.v1.user.usecase.SearchUsersUseCase;
 import com.ednaldoluiz.websocket.web.websocket.store.AuthUser;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
-@RequestMapping("/api/v1/chats")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class ChatRestController {
 
     private final ChatFacade chatFacade;
-    private final UserRepository repo;
+    private final SearchUsersUseCase searchUsersUC;
 
-    @GetMapping("/users")
-    public List<UserSummary> list() {
-        List<UserSummary> lista = repo.findAllProjectedBy();
-        log.info("Listando usuários: {}", lista.size());
-        return lista;
-    }
-
-    @GetMapping("/{chatId}/messages")
-    public ChatHistoryResponse list(
+    @GetMapping("/chats/{chatId}/messages")
+    public ChatHistoryResponse listMessages(
+            Authentication auth,
             @PathVariable Long chatId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size,
-            Authentication auth
-    ) {
-        return chatFacade.list(
-            (AuthUser) auth.getPrincipal(), chatId, page, size
-        );
+            @RequestParam(defaultValue = "50") int size) {
+        Long meId = ((AuthUser) auth.getPrincipal()).id();
+        return chatFacade.listMessages(meId, chatId, page, size);
     }
 
-    // @PatchMapping("/{chatId}")
-    // public void changeStatus(
-    //         @PathVariable Long chatId,
-    //         @RequestBody ChangeChatStatusRequest req,
-    //         Authentication auth
-    // ) {
-    //     chatFacade.changeChatStatus(
-    //         (AuthUser) auth.getPrincipal(), req.withChatId(chatId)
-    //     );
-    // }
+    /* ------------------------ USERS SEARCH ------------------------ */
+    @GetMapping("/users/search")
+    public List<UserSearchResponse> searchUsers(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "20") int limit) {
+        return searchUsersUC.execute(query, limit);
+    }
 
-    // @PatchMapping("/messages/{messageId}")
-    // public void changeMessageStatus(
-    //         @PathVariable Long messageId,
-    //         @RequestBody ChangeMessageStatusRequest req,
-    //         Authentication auth
-    // ) {
-    //     chatFacade.changeMessageStatus(
-    //         (AuthUser) auth.getPrincipal(), req.withMessageId(messageId)
-    //     );
-    // }
+    /* ------------------------ CHAT SUMMARIES ---------------------- */
+    @GetMapping("/chats/summaries")
+    public List<ChatSummaryResponse> listSummaries(Authentication auth) {
+        Long meId = ((AuthUser) auth.getPrincipal()).id();
+        return chatFacade.listSummaries(meId);
+    }
+
+    /* ------------------------ START PRIVATE CHAT ------------------ */
+    @PostMapping("/chats/private")
+    public ChatSummaryResponse startPrivateChat(
+            Authentication auth,
+            @RequestBody @Validated StartChatRequest request) {
+        Long meId = ((AuthUser) auth.getPrincipal()).id();
+        return chatFacade.startPrivate(meId, request);
+    }
 }

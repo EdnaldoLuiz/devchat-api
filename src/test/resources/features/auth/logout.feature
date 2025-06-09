@@ -1,4 +1,4 @@
-@auth
+@/features/auth
 Feature: Logout
   Como um usuário do sistema
   Eu quero realizar logout

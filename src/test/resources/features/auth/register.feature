@@ -1,4 +1,4 @@
-@auth
+@/features/auth
 Feature: Registro de Usuário
   Como um novo usuário
   Eu quero criar uma conta no sistema

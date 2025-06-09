@@ -1,4 +1,4 @@
-@auth
+@/features/auth
 Feature: Autenticação do Usuário
   Como um usuário do sistema
   Eu quero fazer login com meu email e senha

@@ -29,7 +29,7 @@ CREATE TABLE message_status (
     id BIGINT PRIMARY KEY,
     message_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    status ENUM('DELIVERED', 'READ', 'DELETED', 'FAILED', 'PENDING') NOT NULL,
+    status ENUM('DELIVERED', 'READ', 'DELETED', 'FAILED', 'SENT') NOT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_message_status FOREIGN KEY (message_id) REFERENCES messages (id) 
         ON DELETE CASCADE,

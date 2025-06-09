@@ -9,9 +9,9 @@ import com.ednaldoluiz.websocket.domain.model.message.MessageStatus;
 import com.ednaldoluiz.websocket.domain.model.message.MessageStatusType;
 import com.ednaldoluiz.websocket.domain.model.notification.NotificationType;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.ChatRepository;
-import com.ednaldoluiz.websocket.infra.persistence.MessageStatusRepository;
-import com.ednaldoluiz.websocket.infra.persistence.UsersChatsRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.ChatRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.MessageStatusRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.UsersChatsRepository;
 import com.ednaldoluiz.websocket.web.controller.v1.chat.ChatController.NotificationDto;
 
 import lombok.RequiredArgsConstructor;
@@ -89,8 +89,8 @@ public class ChatDomainService {
 
     @Transactional
     public void saveStatuses(Message m, User from, User to) {
-        saveMessageStatus(m, from, MessageStatusType.DELIVERED);
-        saveMessageStatus(m, to, MessageStatusType.PENDING);
+        saveMessageStatus(m, from, MessageStatusType.SENT);
+        saveMessageStatus(m, to, MessageStatusType.DELIVERED);
     }
 
     public void broadcastAndNotify(

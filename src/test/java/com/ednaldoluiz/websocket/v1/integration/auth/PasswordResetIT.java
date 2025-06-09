@@ -20,7 +20,7 @@ import com.ednaldoluiz.websocket.app.v1.auth.dto.request.RegisterRequest;
 import com.ednaldoluiz.websocket.app.v1.auth.dto.request.ResetPasswordRequest;
 import com.ednaldoluiz.websocket.domain.model.user.PasswordResetToken;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.PasswordResetTokenRepository;
 import com.ednaldoluiz.websocket.web.handler.error.ErrorResponse;
 import com.ednaldoluiz.websocket.web.route.Paths;
 import com.ednaldoluiz.websocket.v1.config.TestContainerDatabaseConfig;

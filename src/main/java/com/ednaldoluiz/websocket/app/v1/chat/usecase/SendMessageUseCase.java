@@ -14,8 +14,7 @@ import com.ednaldoluiz.websocket.domain.model.message.MessageFactory;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.domain.service.ChatDomainService;
 import com.ednaldoluiz.websocket.domain.service.MessageDomainService;
-import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
-import com.ednaldoluiz.websocket.web.websocket.store.AuthUser;
+import com.ednaldoluiz.websocket.infra.persistence.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -14,10 +14,10 @@ import com.ednaldoluiz.websocket.domain.model.message.MessageAttachments;
 import com.ednaldoluiz.websocket.domain.model.message.MessageText;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.domain.service.ChatDomainService;
-import com.ednaldoluiz.websocket.infra.persistence.MessageAttachmentsRepository;
-import com.ednaldoluiz.websocket.infra.persistence.MessageRepository;
-import com.ednaldoluiz.websocket.infra.persistence.MessageTextRepository;
-import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.MessageAttachmentsRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.MessageRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.MessageTextRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.UserRepository;
 import com.ednaldoluiz.websocket.web.websocket.store.AuthUser;
 
 import lombok.RequiredArgsConstructor;

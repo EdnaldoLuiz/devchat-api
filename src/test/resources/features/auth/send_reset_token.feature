@@ -1,4 +1,4 @@
-@auth
+@/features/auth
 Feature: Recuperação de Senha
   Como um usuário do sistema
   Eu quero solicitar um reset de senha

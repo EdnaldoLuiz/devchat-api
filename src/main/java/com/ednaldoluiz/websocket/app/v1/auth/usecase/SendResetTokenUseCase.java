@@ -12,8 +12,8 @@ import com.ednaldoluiz.websocket.domain.model.user.PasswordResetToken;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 import com.ednaldoluiz.websocket.domain.port.EmailPort;
 import com.ednaldoluiz.websocket.infra.aws.ses.EmailTemplateService;
-import com.ednaldoluiz.websocket.infra.persistence.PasswordResetTokenRepository;
-import com.ednaldoluiz.websocket.infra.persistence.UserRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.PasswordResetTokenRepository;
+import com.ednaldoluiz.websocket.infra.persistence.repository.UserRepository;
 import com.ednaldoluiz.websocket.web.handler.exception.EmailNotRegisteredException;
 
 import lombok.RequiredArgsConstructor;
