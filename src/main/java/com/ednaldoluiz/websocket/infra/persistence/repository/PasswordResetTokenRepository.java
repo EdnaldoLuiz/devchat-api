@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.persistence;
+package com.ednaldoluiz.websocket.infra.persistence.repository;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

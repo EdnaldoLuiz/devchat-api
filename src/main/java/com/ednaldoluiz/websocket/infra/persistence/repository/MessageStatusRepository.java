@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.persistence;
+package com.ednaldoluiz.websocket.infra.persistence.repository;
 
 import com.ednaldoluiz.websocket.domain.model.message.MessageStatusType;
 import jakarta.transaction.Transactional;

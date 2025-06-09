@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.persistence;
+package com.ednaldoluiz.websocket.infra.persistence.repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
