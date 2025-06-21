@@ -1,5 +1,6 @@
 package com.ednaldoluiz.websocket.web.config;
 
+import com.ednaldoluiz.websocket.web.websocket.interceptor.CipherSizeLimiterInterceptor;
 import com.ednaldoluiz.websocket.web.websocket.interceptor.JwtChannelInterceptor;
 import com.ednaldoluiz.websocket.web.websocket.interceptor.JwtHandshakeInterceptor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     final StompCommandInterceptor stompCommandInterceptor;
     final JwtHandshakeInterceptor jwtHandshakeInterceptor;
     final JwtChannelInterceptor jwtChannelInterceptor;
+    final CipherSizeLimiterInterceptor cipherSizeLimiterInterceptor;
 
     @Value("${app.cors.allowed-origins}")
     private String[] allowed;
@@ -82,7 +84,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setHeartbeatValue(new long[]{HEARTBEAT, HEARTBEAT});
     }
 
-
     /**
      * Configura o canal de entrada do cliente. Aqui, podemos adicionar interceptadores
      * para processar mensagens antes de serem enviadas para os controladores.
@@ -90,7 +91,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(@NonNull ChannelRegistration registration) {
-        registration.interceptors(stompCommandInterceptor, jwtChannelInterceptor);
+        registration.interceptors(
+            stompCommandInterceptor, 
+            jwtChannelInterceptor, 
+            cipherSizeLimiterInterceptor
+        );
     }
 
     @Bean
