@@ -27,7 +27,6 @@ import com.ednaldoluiz.websocket.web.handler.exception.ResetPasswordUserNotFound
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -109,7 +108,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         List<FieldErrorResponse> fieldErrors = ex.getBindingResult().getFieldErrors()
                 .stream()
                 .map(error -> new FieldErrorResponse(error.getField(), error.getDefaultMessage()))
-                .collect(Collectors.toList());
+                .toList();
 
         ErrorResponse errorResponse = new ErrorResponse(
                 "Validation Error",
