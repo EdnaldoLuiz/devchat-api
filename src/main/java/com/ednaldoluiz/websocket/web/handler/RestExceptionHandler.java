@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.ednaldoluiz.websocket.web.handler.exception.BusinessException;
 import com.ednaldoluiz.websocket.web.handler.exception.EmailNotRegisteredException;
 import com.ednaldoluiz.websocket.web.handler.exception.InvalidTokenException;
 import com.ednaldoluiz.websocket.web.handler.exception.LoginValidationException;
@@ -42,6 +43,17 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getMessage(),
                 request.getRequestURI());
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessException(
+            BusinessException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                "Erro de negócio",
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                ex.getMessage(),
+                request.getRequestURI());
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @ExceptionHandler({RegisterValidationException.class, LoginValidationException.class, InvalidTokenException.class, 
