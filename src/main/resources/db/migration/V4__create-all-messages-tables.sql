@@ -2,7 +2,8 @@ CREATE TABLE messages (
     id BIGINT PRIMARY KEY,
     chat_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    message_uuid BINARY(16) UNIQUE NULL,
+    message_uuid BINARY(16) UNIQUE NOT NULL,
+    cipher_body MEDIUMBLOB,
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (chat_id) REFERENCES chats(id),
@@ -11,7 +12,7 @@ CREATE TABLE messages (
 
 CREATE TABLE message_texts (
     message_id BIGINT PRIMARY KEY,
-    content TEXT NOT NULL,
+    content TEXT NULL,
     FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
