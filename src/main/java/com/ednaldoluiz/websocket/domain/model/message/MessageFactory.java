@@ -2,32 +2,52 @@ package com.ednaldoluiz.websocket.domain.model.message;
 
 import java.util.UUID;
 
+import com.ednaldoluiz.websocket.app.v1.chat.command.AttachmentMessageCommand;
+import com.ednaldoluiz.websocket.app.v1.chat.command.SendMessageCommand;
+import com.ednaldoluiz.websocket.app.v1.chat.command.TextMessageCommand;
+import com.ednaldoluiz.websocket.app.v1.chat.dto.response.BufferedMessage;
 import com.ednaldoluiz.websocket.domain.model.chat.Chat;
 import com.ednaldoluiz.websocket.domain.model.user.User;
 
 public final class MessageFactory {
 
-    private MessageFactory() {}
+    private MessageFactory() {
+    }
 
-    public static Message withText(Chat chat, User from, UUID uuid, String content) {
-        Message message = base(chat, from, uuid);
-        if (content != null && !content.isBlank()) {
-            message.addText(content);
-        }
+    public static Message createText(Chat chat, User sender, UUID uuid, byte[] cipherBody) {
+        return new Message(uuid, chat, sender, cipherBody);
+    }
+
+    public static Message createWithAttachment(Chat chat, User sender, UUID uuid, byte[] cipherBody,
+            MessageAttachmentType type, String url) {
+        Message message = new Message(uuid, chat, sender, cipherBody);
+        message.addAttachment(new MessageAttachments(message, type, url));
         return message;
     }
 
-    public static Message withAttachment(Chat chat, User from, UUID uuid,
-                                         String content,
-                                         MessageAttachmentType type,
-                                         String url) {
-        Message m = withText(chat, from, uuid, content);
-        m.addAttachment(type, url);         // outro método de domínio
-        return m;
+    public static Message fromCommand(Chat chat, User sender, SendMessageCommand cmd, byte[] cipherBody) {
+        if (cmd instanceof AttachmentMessageCommand attachment) {
+            return createWithAttachment(chat, sender, attachment.messageUuid(), cipherBody, attachment.type(),
+                    attachment.url());
+        } else if (cmd instanceof TextMessageCommand text) {
+            return createText(chat, sender, text.messageUuid(), cipherBody);
+        }
+        throw new IllegalArgumentException("Message command desconhecido: " + cmd.getClass());
     }
 
-    /* ---------- helpers ---------- */
-    private static Message base(Chat chat, User from, UUID uuid) {
-        return new Message(uuid, chat, from);   // construtor protegido
+    public static Message fromBuffered(BufferedMessage bm, Chat chat, User from, User to) {
+        Message message = new Message(
+                bm.messageUuid(),
+                chat,
+                from,
+                java.util.Base64.getDecoder().decode(bm.payloadBase64()));
+        message.setSentAt(
+                java.time.Instant.ofEpochMilli(bm.sentAtMillis())
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDateTime());
+        if (bm.hasAttachment() && bm.attachmentType() != null && bm.attachmentUrl() != null) {
+            message.addAttachment(new MessageAttachments(message, bm.attachmentType(), bm.attachmentUrl()));
+        }
+        return message;
     }
 }
