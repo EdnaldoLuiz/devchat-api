@@ -3,7 +3,7 @@ package com.ednaldoluiz.websocket.web.controller.v1.signal;
 /**
  * Documentação dos endpoints de gerenciamento de Signal Keys (E2EE).
  */
-public interface SignalKeyDocs {
+interface SignalKeyDocs {
 
     /**
      * Documentação para o endpoint de upload (salvar/atualizar) do bundle de chaves Signal.

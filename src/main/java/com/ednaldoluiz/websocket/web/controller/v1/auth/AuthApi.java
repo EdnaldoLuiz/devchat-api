@@ -33,7 +33,7 @@ import jakarta.validation.Valid;
     produces = MediaType.APPLICATION_JSON_VALUE
 )
 @Tag(name = "Autenticação", description = "Endpoints responsáveis pelo registro e autenticação de usuários.")
-public interface AuthApi {
+interface AuthApi {
 
     /**
      * Endpoint para registrar um novo usuário.

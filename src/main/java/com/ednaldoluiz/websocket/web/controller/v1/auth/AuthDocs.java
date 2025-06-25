@@ -7,7 +7,7 @@ package com.ednaldoluiz.websocket.web.controller.v1.auth;
  *  - GeneratePassword: Documentação para o endpoint de geração de senha segura.
  *  - Logout: Documentação para o endpoint de logout de usuário.
  */
-public interface AuthDocs {
+interface AuthDocs {
 
     /**
      * Documentação para o endpoint de Registro de Usuário.

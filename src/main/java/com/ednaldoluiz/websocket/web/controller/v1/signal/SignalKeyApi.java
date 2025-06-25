@@ -26,7 +26,7 @@ import jakarta.validation.Valid;
 
 @RequestMapping(path = Paths.V1.Signal.SIGNAL, produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Signal Keys", description = "Gerenciamento seguro do bundle de chaves E2EE para WebSocket/Signal.")
-public interface SignalKeyApi {
+interface SignalKeyApi {
 
     /**
      * Endpoint para upload do bundle de chaves do Signal.
