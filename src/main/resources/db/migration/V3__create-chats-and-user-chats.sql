@@ -22,3 +22,21 @@ CREATE TABLE users_chats (
         ON DELETE CASCADE ON UPDATE CASCADE,
     UNIQUE (user_id, chat_id) 
 );
+
+CREATE TABLE chat_summaries (
+    user_id                 BIGINT  NOT NULL,
+    chat_id                 BIGINT  NOT NULL,
+    participant_id          BIGINT  NULL,
+    room_id                 BIGINT  NULL,
+    participant_name        VARCHAR(120),
+    participant_avatar      VARCHAR(255),
+    last_message_id         BIGINT,
+    last_message_at         TIMESTAMP,
+    last_message_content    TEXT,
+    last_message_sender_id  BIGINT,
+    unread_count            INT     DEFAULT 0,
+    PRIMARY KEY (user_id, chat_id),
+
+    /* feed da sidebar = ORDER BY last_message_at DESC   */
+    INDEX idx_user_lastmsg (user_id, last_message_at DESC)
+);
