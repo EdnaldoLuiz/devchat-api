@@ -1,5 +1,6 @@
 package com.ednaldoluiz.websocket.app.v1.chat.usecase;
 
+import com.ednaldoluiz.websocket.web.websocket.event.ChatSummaryPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.ednaldoluiz.websocket.app.v1.chat.dto.request.StartChatRequest;
@@ -21,6 +22,7 @@ public class StartPrivateChatUseCase {
     private final ChatDomainService chatService;
     private final UserRepository userRepository;
     private final ChatSummaryRepository summaries;
+    private final ChatSummaryPublisher publisher;
 
     @Transactional
     public ChatSummaryResponse execute(Long requesterId, StartChatRequest cmd) {
@@ -40,6 +42,9 @@ public class StartPrivateChatUseCase {
             me.getId(),   chat.getId(),
             you.getId(),  you.getName(), you.getAvatar(),
             me.getName(), me.getAvatar());
+
+        // summaries.findByUserIdAndChatId(me.getId(),  chat.getId()).ifPresent(publisher::publish);
+        // summaries.findByUserIdAndChatId(you.getId(), chat.getId()).ifPresent(publisher::publish);
 
         return summaries.findByUserIdAndChatId(me.getId(), chat.getId())
                         .map(ChatSummaryResponse::from)
