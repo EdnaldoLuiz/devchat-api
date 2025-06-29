@@ -1,5 +1,81 @@
 <h1 align=center>DevChat-Api</h1>
 
+## *🗺️ Diagramas*
+
+### *🔒🔑 Arquitetura E2EE (Signal)*
+
+Este diagrama ilustra o fluxo completo de comunicação **fim-a-fim criptografada** implementado na nossa API usando o protocolo Signal:
+
+- Mostra como o cliente gera e publica chaves na primeira inicialização (ou quando o storage local é perdido).
+- Descreve o handshake de sessão entre usuários, com fetch seguro de bundles.
+- Explica o envio de mensagens cifradas via WebSocket, totalmente opacas ao servidor.
+- Detalha como o backend monitora **pre-keys** e **signedPreKeys**, enviando alertas automáticos para reposição ou rotação.
+- Representa a segurança baseada em **IndexedDB local** com _trust-on-first-use_.
+
+---
+
+```mermaid
+---
+config:
+  theme: redux-dark-color
+---
+sequenceDiagram
+  autonumber
+  participant FE_A as Frontend A
+  participant SC_A as SignalClient A
+  participant WS as WebSocket Broker
+  participant API as REST API
+  participant FE_B as Frontend B
+  participant SC_B as SignalClient B
+
+  rect rgba(0, 0, 255, 0.1)
+    FE_A->>SC_A: bootstrap()
+    alt Primeiro login OU IndexedDB limpo/perdido
+      SC_A->>API: POST /signal/keys/save
+      API-->>SC_A: 201 Created
+    else Já tem chaves locais
+      SC_A-->SC_A: Load keys from IndexedDB
+    end
+  end
+
+  rect rgba(0, 100, 0, 0.1)
+    FE_A->>SC_A: ensureSession(B)
+    SC_A->>API: GET /signal/keys/fetch/{B}
+    API-->>SC_A: {identity_B, SPK_B, PK₁}
+    SC_A-->SC_A: SessionBuilder.processPreKey()
+  end
+
+  rect rgba(128, 0, 128, 0.1)
+    FE_A->>SC_A: encrypt("Olá")
+    SC_A->>WS: SEND /chat (ciphertext, type=WHISPER)
+    WS->>FE_B: MESSAGE (ciphertext)
+    FE_B->>SC_B: decrypt()
+    SC_B-->FE_B: "Olá"
+  end
+
+  rect rgba(255, 165, 0, 0.1)
+    Note over API: Monitor de PreKeys
+    API->>WS: toUser(B) {type: LOW_PREKEY, remaining:18}
+    WS->>FE_B: evento LOW_PREKEY
+    FE_B->>SC_B: replenishBundle() (+100 PK)
+    SC_B->>API: POST /signal/keys/save (novos PKs)
+    API-->>SC_B: 201 Created
+  end
+
+  rect rgba(220, 20, 60, 0.1)
+    Note over API: Scheduler detecta SPK expirada
+    API->>WS: toUser(B) {type: SPK_EXPIRED}
+    WS->>FE_B: evento SPK_EXPIRED
+    FE_B->>SC_B: rotateSignedPreKey()
+    SC_B->>API: POST /signal/keys/rotate-spk (nova SPK₁)
+    API-->>SC_B: 200 OK
+  end
+
+  Note over FE_A,FE_B: 🛡️ Próxima mensagem usa SPK₁ de B
+```
+
+---
+
 ## *🖥️ Tech Stack*
 
 ### *👨‍💻 Technologies*
