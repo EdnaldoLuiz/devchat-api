@@ -2,6 +2,112 @@
 
 ## *🗺️ Diagramas*
 
+
+### *🔒🔑 Arquitetura de Autenticação de Usuários*
+
+Este diagrama mostra, de forma clara e enxuta, todo o fluxo de autenticação do sistema:
+
+* **Registro** de novos usuários com senha criptografada
+* **Login** por credenciais e via **OAuth2** (GitHub/Google)
+* **Recuperação de senha** (esqueci senha + redefinição) sem expor existência de conta
+* **Logout** via blacklist de token
+* **Acesso a rotas protegidas** validando JWT e blacklist
+
+```mermaid
+---
+config:
+  theme: redux-dark-color
+---
+sequenceDiagram
+  autonumber
+  participant FE as Front-end
+  participant API as REST API
+  participant DB as MySQL
+  participant REDIS as Redis (Blacklist)
+  participant SES as Serviço de Email
+  participant OAUTH as OAuth2 Provider
+
+  %% 1) REGISTRO
+  rect rgba(0, 0, 255, 0.1)
+    FE->>API: POST /auth/register {email, senha, confirmação, nome, termos}
+    API->>DB: cria usuário com senha criptografada
+    DB-->>API: usuário criado (id)
+    API-->API: gera JWT + Refresh
+    API-->>FE: 201 Created {access, refresh}
+  end
+
+  %% 2) LOGIN POR CREDENCIAIS
+  rect rgba(0, 128, 0, 0.1)
+    FE->>API: POST /auth/login {email, senha}
+    API->>DB: busca usuário por email e compare hash
+    alt credenciais válidas
+      API-->API: gera JWT + Refresh
+      API-->>FE: 200 OK {access, refresh}
+    else inválido
+      API-->>FE: 401 Unauthorized {"Email ou senha inválidos"}
+    end
+  end
+
+  %% 3) LOGIN VIA OAUTH2
+  rect rgba(0, 128, 128, 0.1)
+    FE->>OAUTH: redirect para login externo
+    OAUTH-->>FE: Callback OAuth2 com ccódigo
+    FE->>API: GET /auth/oauth2/success?code=…
+    API-->API: troca código por userInfo
+    API->>DB: busca ou cria usuário via provider
+    API-->API: gera JWT
+    API-->>FE: 200 OK {access}
+  end
+
+  %% 4) ESQUECI SENHA → RESET
+  rect rgba(255, 165, 0, 0.1)
+    FE->>API: POST /auth/forgot-password?email=…
+    API->>DB: tenta buscar usuário por email
+    alt email cadastrado
+      API-->API: cria token (UUID + hash) e persiste
+      API-->API: monta link de reset
+      API->>SES: envia email com link
+    else não cadastrado
+      Note right of API: ignora e retorna mesma resposta
+    end
+    API-->>FE: 200 OK {"Confira seu email para instruções"}
+  end
+
+  rect rgba(255, 140, 0, 0.1)
+    FE->>API: POST /auth/reset-password {key, token, novaSenha}
+    API->>DB: busca token de reset por key
+    alt token válido e não expirado
+      API-->API: atualiza senha (hash) e marca token usado
+      API-->>FE: 200 OK {"Senha redefinida com sucesso"}
+    else inválido ou expirado
+      API-->>FE: 400 Bad Request {"Token inválido ou expirado"}
+    end
+  end
+
+  %% 5) LOGOUT
+  rect rgba(220, 20, 60, 0.1)
+    FE->>API: POST /auth/logout (Bearer JWT)
+    API-->API: extrai jti + exp do token
+    API->>REDIS: adiciona jti na blacklist até expirar
+    REDIS-->>API: OK
+    API-->>FE: 200 OK {"Logout realizado"}
+  end
+
+  %% 6) ACESSO A RECURSOS PROTEGIDOS
+  rect rgba(128, 0, 128, 0.1)
+    FE->>API: GET /api/recurso (Bearer JWT)
+    API-->API: JwtAuthFilter intercepta
+    API->>REDIS: verifica se jti está blacklist
+    alt token válido e não blacklist
+      API-->>FE: 200 OK {dados…}
+    else inválido ou blacklist
+      API-->>FE: 401 Unauthorized {"Token inválido ou expirado"}
+    end
+  end
+```
+
+---
+
 ### *🔒🔑 Arquitetura E2EE (Signal)*
 
 Este diagrama ilustra o fluxo completo de comunicação **fim-a-fim criptografada** implementado na nossa API usando o protocolo Signal:
