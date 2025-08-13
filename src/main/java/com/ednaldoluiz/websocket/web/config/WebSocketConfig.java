@@ -35,6 +35,27 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Value("${app.cors.allowed-origins}")
     private String[] allowed;
 
+    @Value("${app.stomp.relay.enabled:false}")
+    boolean relayEnabled;
+
+    @Value("${app.stomp.relay.host:localhost}")
+    String relayHost;
+
+    @Value("${app.stomp.relay.port:61613}")
+    Integer relayPort;
+
+    @Value("${app.stomp.relay.client-login:guest}")
+    String clientLogin;
+
+    @Value("${app.stomp.relay.client-passcode:guest}")
+    String clientPasscode;
+
+    @Value("${app.stomp.relay.system-login:guest}")
+    String systemLogin;
+
+    @Value("${app.stomp.relay.system-passcode:guest}")
+    String systemPasscode;
+
     static long HEARTBEAT = 10_000;
     static int MESSAGE_SIZE_LIMIT = 1024 * 1024;
     static int SEND_BUFFER_SIZE_LIMIT = 1024 * 1024;
@@ -51,7 +72,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setAllowedOrigins(allowed)
                 .addInterceptors(jwtHandshakeInterceptor)
                 .withSockJS()
-                    .setSessionCookieNeeded(false);
+                .setSessionCookieNeeded(false);
     }
 
     /**
@@ -76,12 +97,25 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config
-                .setApplicationDestinationPrefixes("/app")
-                .setUserDestinationPrefix("/user")
-                .enableSimpleBroker("/topic", "/queue")
-                .setTaskScheduler(heartBeatScheduler())
-                .setHeartbeatValue(new long[]{HEARTBEAT, HEARTBEAT});
+        config.setApplicationDestinationPrefixes("/app")
+              .setUserDestinationPrefix("/user");
+
+        if (relayEnabled) {
+            config.enableStompBrokerRelay("/queue", "/topic")
+                  .setRelayHost(relayHost)
+                  .setRelayPort(relayPort)
+                  .setVirtualHost("/")
+                  .setClientLogin(clientLogin)
+                  .setClientPasscode(clientPasscode)
+                  .setSystemLogin(systemLogin)
+                  .setSystemPasscode(systemPasscode)
+                  .setSystemHeartbeatReceiveInterval((int) HEARTBEAT)
+                  .setSystemHeartbeatSendInterval((int) HEARTBEAT);
+        } else {
+            config.enableSimpleBroker("/topic", "/queue")
+                  .setTaskScheduler(heartBeatScheduler())
+                  .setHeartbeatValue(new long[]{HEARTBEAT, HEARTBEAT});
+        }
     }
 
     /**

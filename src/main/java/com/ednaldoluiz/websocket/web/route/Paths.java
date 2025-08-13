@@ -11,6 +11,10 @@ public interface Paths {
         interface Auth {
             String AUTH = CLIENT + "/auth";
         }
+
+        interface Signal {
+            String SIGNAL = CLIENT + "/signal";
+        }
     }
 
     interface Auth {
@@ -20,5 +24,12 @@ public interface Paths {
         String LOGOUT = "/logout";
         String FORGOT_PASSWORD = "/forgot-password";
         String RESET_PASSWORD = "/reset-password";
+    }
+
+    interface Signal {
+        String SAVE_KEY_BUNDLE = "/keys/save";
+        String FETCH_KEY_BUNDLE = "/keys/fetch/{targetId}";
+        String ROTATE_SPK = "/keys/rotate-spk";
+        String STATUS = "/keys/status";
     }
 }

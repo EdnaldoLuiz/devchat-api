@@ -6,6 +6,25 @@ volumes:
 
 services:
 
+  ############ RabbitMQ (STOMP) ############
+  rabbit:
+    image: rabbitmq:3.13-management
+    container_name: websocket_rabbit
+    command: [ "bash", "-lc", "rabbitmq-plugins enable --offline rabbitmq_stomp && rabbitmq-server" ]
+    environment:
+      RABBITMQ_DEFAULT_USER: chat
+      RABBITMQ_DEFAULT_PASS: secret
+    ports:
+      - "5672:5672"     # AMQP (opcional, útil p/ admin/ferramentas)
+      - "15672:15672"   # Management UI
+      - "61613:61613"   # STOMP (necessário p/ o relay)
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [ chat-net ]
+    
   ############ MySQL ############
   db:
     build:
@@ -13,7 +32,7 @@ services:
       dockerfile: Dockerfile
     container_name: websocket_db
     ports:
-      - "3308:3306"            # host:container
+      - "3308:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: websocket
@@ -24,6 +43,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    command:
+      - --log-bin-trust-function-creators=1
     volumes:
       - db_data:/var/lib/mysql
     networks: [ chat-net ]
@@ -46,11 +67,11 @@ services:
     depends_on:
       db:       { condition: service_healthy }
       redis:    { condition: service_started }
+      rabbit:   { condition: service_healthy }
     env_file:
-      - .env               # mantém secrets externos (AWS, OAuth, etc.)
+      - .env
     environment:
-      # sobrescreve apenas o que é local
-      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: local
       SERVER_PORT: 8080
       DB_HOST: db
       DB_PORT: 3306
@@ -59,6 +80,13 @@ services:
       DB_PASSWORD: 06022003
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      STOMP_RELAY_HOST: rabbit
+      STOMP_RELAY_PORT: 61613
+      STOMP_RELAY_LOGIN: chat
+      STOMP_RELAY_PASSCODE: secret
+      STOMP_RELAY_SYSTEM_LOGIN: chat
+      STOMP_RELAY_SYSTEM_PASSCODE: secret
+      APP_STOMP_RELAY_ENABLED: "true"
     ports:
       - "8081:8080"         # host -> container
     networks: [ chat-net ]

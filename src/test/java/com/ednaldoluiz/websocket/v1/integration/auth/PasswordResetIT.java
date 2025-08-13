@@ -55,7 +55,7 @@ class PasswordResetIT extends AbstractAuthTest {
         String rawToken = UUID.randomUUID().toString();
         String hashedToken = passwordEncoder.encode(rawToken);
         PasswordResetToken token = new PasswordResetToken(user, keyId, hashedToken);
-        tokenRepository.save(token);
+        tokenRepository.persist(token);
 
         ResetPasswordRequest resetRequest = new ResetPasswordRequest(keyId, rawToken, "NovaSenha123!", "NovaSenha123!");
 
@@ -96,7 +96,7 @@ class PasswordResetIT extends AbstractAuthTest {
         String hashedToken = passwordEncoder.encode(rawToken);
         PasswordResetToken token = new PasswordResetToken(user, keyId, hashedToken);
         ReflectionTestUtils.setField(token, "expiresAt", LocalDateTime.now().minus(31, ChronoUnit.MINUTES));
-        tokenRepository.save(token);
+        tokenRepository.persist(token);
 
         ResetPasswordRequest resetRequest = new ResetPasswordRequest(keyId, rawToken, "NovaSenha123!", "NovaSenha123!");
 
@@ -119,7 +119,7 @@ class PasswordResetIT extends AbstractAuthTest {
         String rawToken = UUID.randomUUID().toString();
         String hashedToken = passwordEncoder.encode(rawToken);
         PasswordResetToken token = new PasswordResetToken(user, keyId, hashedToken);
-        tokenRepository.save(token);
+        tokenRepository.persist(token);
 
         ResetPasswordRequest resetRequest = new ResetPasswordRequest(keyId, UUID.randomUUID().toString(), "NovaSenha123!", "NovaSenha123!");
 

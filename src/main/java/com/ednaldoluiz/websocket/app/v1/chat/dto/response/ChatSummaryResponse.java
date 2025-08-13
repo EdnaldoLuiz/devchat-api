@@ -2,7 +2,7 @@ package com.ednaldoluiz.websocket.app.v1.chat.dto.response;
 
 import java.time.LocalDateTime;
 
-import com.ednaldoluiz.websocket.infra.persistence.jdbcrepository.projection.ChatSummaryProjection;
+import com.ednaldoluiz.websocket.domain.model.chat.ChatSummary;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -34,17 +34,17 @@ public record ChatSummaryResponse(
 
     int unreadCount
 ) {
-    public static ChatSummaryResponse from(ChatSummaryProjection projection) {
+    public static ChatSummaryResponse from(ChatSummary projection) {
         return new ChatSummaryResponse(
-            projection.chatId(),
-            projection.participantId(),
-            projection.roomId(),
-            projection.lastMessageId(),
-            projection.lastMessageSenderId(),
-            projection.participantName(),
-            projection.participantAvatar(),
-            projection.lastMessageAt(),
-            projection.unreadCount()
+            projection.getChatId(),
+            projection.getParticipantId(),
+            projection.getRoomId(),
+            projection.getLastMessageId(),
+            projection.getLastMessageSenderId(),
+            projection.getParticipantName(),
+            projection.getParticipantAvatar(),
+            projection.getLastMessageAt(),
+            projection.getUnreadCount()
         );
     }
 }

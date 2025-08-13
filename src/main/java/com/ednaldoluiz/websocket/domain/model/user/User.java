@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,7 +20,7 @@ import com.ednaldoluiz.websocket.domain.model.base.TimestampedEntityBase;
 @Entity
 @Table(name = "users", schema = "websocket")
 @NoArgsConstructor
-public class User extends TimestampedEntityBase implements UserDetails, Serializable {
+public class User extends TimestampedEntityBase implements UserDetails {
 
     @Column(name = "name", nullable = false, length = 50)
     private String name;
@@ -33,7 +32,7 @@ public class User extends TimestampedEntityBase implements UserDetails, Serializ
     @Column(name = "password", nullable = false, length = 255)
     private char[] password;
 
-    @Column(name = "phone", nullable = false, length = 20, unique = true)
+    @Column(name = "phone", length = 20, unique = true)
     private String phone;
 
     @Column(name = "avatar", length = 255)

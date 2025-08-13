@@ -18,13 +18,13 @@ public record KeyBundleRequestDTO(
         int registrationId,
 
         @NotNull
-        @ByteArraySize(32)
+        @ByteArraySize(33)
         byte[] identityKey,
         @Min(1)
         int signedPreKeyId,
 
         @NotNull
-        @ByteArraySize(32)
+        @ByteArraySize(33)
         byte[] signedPreKey,
 
         @NotNull

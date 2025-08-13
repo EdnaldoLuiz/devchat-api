@@ -38,7 +38,7 @@ public class SendResetTokenUseCase {
 
         String rawToken = UUID.randomUUID().toString();
         PasswordResetToken tokenEntity = generatePasswordResetToken(user, rawToken);
-        tokenRepository.save(tokenEntity);
+        tokenRepository.persist(tokenEntity);
 
         String resetLink = generateResetLink(tokenEntity.getKeyId(), rawToken);
         sendResetEmail(user.getEmail(), user.getName(), resetLink);

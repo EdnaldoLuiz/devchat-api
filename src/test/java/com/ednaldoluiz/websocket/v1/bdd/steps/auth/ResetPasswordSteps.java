@@ -34,7 +34,7 @@ public class ResetPasswordSteps extends BaseSteps {
     @Given("que existe um usuário cadastrado com email {string}")
     public void criarUsuario(String email) {
         var user = new User(email, passwordEncoder.encode("SenhaForte123!"), "Usuário Teste");
-        userRepository.save(user);
+        userRepository.persist(user);
     }
 
     @Given("que existe um token válido com key {string} e token {string} vinculado ao usuário com email {string}")
@@ -44,7 +44,7 @@ public class ResetPasswordSteps extends BaseSteps {
 
         String hashedToken = passwordEncoder.encode(token);
         var resetToken = new PasswordResetToken(user, key, hashedToken);
-        tokenRepository.save(resetToken);
+        tokenRepository.persist(resetToken);
     }
 
     @Given("que existe um token expirado com key {string} vinculado ao usuário")
@@ -56,7 +56,7 @@ public class ResetPasswordSteps extends BaseSteps {
 
         PasswordResetToken token = new PasswordResetToken(user, key, hashedToken);
         ReflectionTestUtils.setField(token, "expiresAt", LocalDateTime.now().minusMinutes(10));
-        tokenRepository.save(token);
+        tokenRepository.persist(token);
     }
 
     @Given("que existe um token válido com key {string} e token {string} vinculado a um usuário removido do banco")
@@ -64,11 +64,11 @@ public class ResetPasswordSteps extends BaseSteps {
         // Primeiro cria o usuário normalmente
         User usuarioRemovido = new User("removido@example.com", passwordEncoder.encode("SenhaTeste123!"),
                 "Usuário Removido");
-        userRepository.save(usuarioRemovido);
+        userRepository.persist(usuarioRemovido);
 
         String hashedToken = passwordEncoder.encode(token);
         var resetToken = new PasswordResetToken(usuarioRemovido, key, hashedToken);
-        tokenRepository.save(resetToken);
+        tokenRepository.persist(resetToken);
 
         userRepository.delete(usuarioRemovido);
     }

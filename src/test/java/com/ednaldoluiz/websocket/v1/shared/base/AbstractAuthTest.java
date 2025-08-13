@@ -21,7 +21,7 @@ public abstract class AbstractAuthTest extends AbstractApiTest {
                 request.email(),
                 passwordEncoder.encode(request.password()),
                 request.name());
-        userRepository.save(userEntity);
+        userRepository.persist(userEntity);
         log.info("Usuário salvo no banco: {}", userRepository.findByEmail(request.email()));
         return userEntity;
     }

@@ -136,7 +136,7 @@ class SendResetTokenIT extends AbstractAuthTest {
                 passwordEncoder.encode("fakeHashedToken"));
         ReflectionTestUtils.setField(token, "expiresAt", LocalDateTime.now().minusMinutes(1));
 
-        tokenRepository.save(token);
+        tokenRepository.persist(token);
 
         PasswordResetToken fetchedToken = tokenRepository.findById(token.getId())
                 .orElseThrow(() -> new AssertionError("Token não encontrado"));
@@ -159,10 +159,10 @@ class SendResetTokenIT extends AbstractAuthTest {
         PasswordResetToken token = new PasswordResetToken(user, UUID.randomUUID().toString(),
                 passwordEncoder.encode("fakeHashedToken"));
 
-        tokenRepository.save(token);
+        tokenRepository.persist(token);
 
         token.markAsUsed();
-        tokenRepository.save(token);
+        tokenRepository.update(token);
 
         PasswordResetToken fetchedToken = tokenRepository.findById(token.getId())
                 .orElseThrow(() -> new AssertionError("Token não encontrado"));

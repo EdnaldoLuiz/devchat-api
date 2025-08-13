@@ -1,4 +1,4 @@
-package com.ednaldoluiz.websocket.infra.cache;
+package com.ednaldoluiz.websocket.infra.persistence.config;
 
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.cache.annotation.EnableCaching;
@@ -8,14 +8,21 @@ import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import com.ednaldoluiz.websocket.app.v1.chat.dto.response.BufferedMessage;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 
 @Configuration
 @EnableCaching
+@EnableRedisRepositories(basePackages = "com.ednaldoluiz.websocket.infra.persistence.redis")
 public class RedisConfig {
 
     /**
@@ -102,12 +109,34 @@ public class RedisConfig {
      */
 
     @Bean(name = "redisTemplate")
-    public <T> RedisTemplate<String, T> redisTemplate(RedisConnectionFactory cf) {
-        RedisTemplate<String, T> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setDefaultSerializer(new StringRedisSerializer());
-        redisTemplate.setConnectionFactory(cf);
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.afterPropertiesSet();
-        return redisTemplate;
+    public RedisTemplate<String, String> stringRedisTemplate(RedisConnectionFactory cf) {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(cf);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new StringRedisSerializer());
+        template.afterPropertiesSet();
+        return template;
+    }
+
+    @Bean
+    public RedisTemplate<String, BufferedMessage> bufferedMessageRedisTemplate(RedisConnectionFactory cf) {
+        var template = new RedisTemplate<String, BufferedMessage>();
+        template.setConnectionFactory(cf);
+
+        var keySer = new StringRedisSerializer();
+        template.setKeySerializer(keySer);
+        template.setHashKeySerializer(keySer);
+
+        var objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        var valueSer = new Jackson2JsonRedisSerializer<>(objectMapper, BufferedMessage.class);
+
+        template.setValueSerializer(valueSer);
+        template.setHashValueSerializer(valueSer);
+
+        template.afterPropertiesSet();
+        return template;
     }
 }

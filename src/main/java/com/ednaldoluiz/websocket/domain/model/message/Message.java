@@ -37,6 +37,10 @@ public class Message extends EntityBase {
     @Column(name = "cipher_body", nullable = false, columnDefinition = "MEDIUMBLOB")
     private byte[] cipherBody;
 
+    @Convert(converter = CipherTypeConverter.class)
+    @Column(name = "cipher_type", nullable = false)
+    private CipherType cipherType;
+
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
 

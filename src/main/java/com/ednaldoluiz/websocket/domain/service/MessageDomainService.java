@@ -1,18 +1,19 @@
 package com.ednaldoluiz.websocket.domain.service;
 
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ednaldoluiz.websocket.app.v1.chat.command.SendMessageCommand;
+import com.ednaldoluiz.websocket.app.v1.chat.dto.response.BufferedMessage;
 import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatMessageResponse;
+import com.ednaldoluiz.websocket.domain.model.chat.Chat;
 import com.ednaldoluiz.websocket.domain.model.message.Message;
-import com.ednaldoluiz.websocket.domain.model.message.MessageStatus;
-import com.ednaldoluiz.websocket.domain.model.message.MessageStatusType;
-import com.ednaldoluiz.websocket.domain.model.notification.NotificationType;
+import com.ednaldoluiz.websocket.domain.model.message.MessageFactory;
 import com.ednaldoluiz.websocket.domain.model.user.User;
+import com.ednaldoluiz.websocket.infra.persistence.batch.RedisMessageBufferService;
 import com.ednaldoluiz.websocket.infra.persistence.repository.MessageRepository;
-import com.ednaldoluiz.websocket.infra.persistence.repository.MessageStatusRepository;
-import com.ednaldoluiz.websocket.web.controller.v1.chat.ChatController.NotificationDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,33 +23,38 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MessageDomainService {
 
-    private final MessageRepository      msgRepo;
-    private final MessageStatusRepository statusRepo;
-    private final SimpMessagingTemplate  template;
+    private final RedisMessageBufferService bufferService;
+    private final MessageRepository         messageRepository;
+    private final SimpMessagingTemplate     broker;
 
-    @Transactional
-    public Message persist(Message m) { 
-        return msgRepo.save(m);
-    }
+    /**
+     * Orquestra o envio de mensagem: joga em Redis buffer, faz broadcast.
+     * Fallback: salva direto no DB se Redis indisponível.
+     */
+    @Transactional(noRollbackFor = RedisSystemException.class)
+    public ChatMessageResponse send(User from, User to, Chat chat, SendMessageCommand cmd, byte[] cipherBody) {
 
-    @Transactional
-    public void createStatuses(Message message, User from, User to) {
-        save(from, message, MessageStatusType.SENT);
-        log.info(">>> Message {} status DELIVERED for {}", message.getMessageUuid(), from.getId());
-        save(to, message, MessageStatusType.DELIVERED);
-        log.info(">>> Message {} status PENDING for {}", message.getMessageUuid(), to.getId());
-    }
+        BufferedMessage buffered = BufferedMessage.of(from, to, chat, cmd, cipherBody);
+        log.info("[SEND] uuid={} cipherType={} from={} to={} chat={}",
+        buffered.messageUuid(), buffered.cipherType(), from.getId(), to.getId(), chat.getId());
 
-    @Transactional
-    public void save(User user, Message message, MessageStatusType statusType) {
-        statusRepo.save(new MessageStatus(user, message, statusType));
-    }
+        boolean bufferedOk = false;
+        try {
+            bufferService.push(buffered);
+            bufferedOk = true;
+        } catch (RedisSystemException ex) {
+            log.error("Redis indisponível – fallback para DB direto", ex);
+            Message entity = MessageFactory.fromBuffered(buffered, chat, from, to);
+            messageRepository.persist(entity);
+        }
 
-    public void broadcast(User from, User to, ChatMessageResponse dto) {
-        template.convertAndSendToUser(from.getId().toString(), "/queue/messages", dto);
-        template.convertAndSendToUser(to.getId().toString()  , "/queue/messages", dto);
+        ChatMessageResponse response = ChatMessageResponse.from(buffered, to.getId(), !bufferedOk);
+        broker.convertAndSendToUser(from.getId().toString(), "/queue/messages", response);
+        broker.convertAndSendToUser(to.getId().toString(),   "/queue/messages", response);
 
-        template.convertAndSendToUser(to.getId().toString(), "/queue/notify",
-            new NotificationDto(to.getId().toString(), NotificationType.MESSAGE, from.getId().toString()));
+        log.info("Mensagem {} enfileirada (buffer Redis? {}), from={} to={} chat={}", 
+                 buffered.messageUuid(), bufferedOk, from.getId(), to.getId(), chat.getId());
+
+        return response;
     }
 }

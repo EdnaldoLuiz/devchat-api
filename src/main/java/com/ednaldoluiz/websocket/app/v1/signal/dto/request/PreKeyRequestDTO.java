@@ -15,7 +15,7 @@ public record PreKeyRequestDTO(
         int keyId,
 
         @NotNull
-        @ByteArraySize(32)
+        @ByteArraySize(33)
         byte[] publicKey
 
 ) {

@@ -19,7 +19,18 @@ public interface UsersChatsRepository extends BaseRepository<UsersChat> {
         """)
     Optional<UsersChat> findByChatIdAndUserId(Long chatId, Long id);
 
-    @Query("select uc from UsersChat uc where uc.chat.id = :chatId")
+    @Query("""
+        SELECT uc.user.id
+          FROM UsersChat uc
+         WHERE uc.chat.id = :chatId
+           AND uc.user.id <> :myId
+        """)
+    Long findOtherParticipant(Long chatId, Long myId);
+
+    @Query("SELECT uc.user.id FROM UsersChat uc WHERE uc.chat.id = :chatId")
+    List<Long> findParticipantIds(Long chatId);
+
+    @Query("SELECT uc FROM UsersChat uc WHERE uc.chat.id = :chatId")
     List<UsersChat> findAllByChatId(@Param("chatId") Long chatId);
 
 }

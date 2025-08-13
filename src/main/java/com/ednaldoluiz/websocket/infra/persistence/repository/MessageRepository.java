@@ -18,12 +18,12 @@ public interface MessageRepository extends BaseRepository<Message> {
                    m.messageUuid,
                    m.user.id,
                    :recipientId,
-                   mt.content,
+                   m.cipherType,
+                   m.cipherBody,
                    ma.attachmentType,
                    m.sentAt
                )
                FROM Message m
-               LEFT JOIN MessageText        mt ON mt.message.id = m.id
                LEFT JOIN MessageAttachments ma ON ma.message.id = m.id
                WHERE m.chat.id = :chatId
                ORDER BY m.sentAt ASC
@@ -32,13 +32,5 @@ public interface MessageRepository extends BaseRepository<Message> {
             @Param("chatId") Long chatId,
             @Param("recipientId") Long recipientId,
             Pageable pageable);
-
-    @Query("""
-                select m from Message m
-                left join fetch m.messageText
-                where m.chat.id = :chatId
-                order by m.sentAt desc
-            """)
-    Page<Message> findByChatIdFetchText(@Param("chatId") Long chatId, Pageable pageable);
 
 }

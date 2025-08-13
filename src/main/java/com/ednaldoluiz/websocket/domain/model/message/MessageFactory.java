@@ -1,5 +1,7 @@
 package com.ednaldoluiz.websocket.domain.model.message;
 
+import java.time.Instant;
+import java.util.Base64;
 import java.util.UUID;
 
 import com.ednaldoluiz.websocket.app.v1.chat.command.AttachmentMessageCommand;
@@ -40,11 +42,11 @@ public final class MessageFactory {
                 bm.messageUuid(),
                 chat,
                 from,
-                java.util.Base64.getDecoder().decode(bm.payloadBase64()));
-        message.setSentAt(
-                java.time.Instant.ofEpochMilli(bm.sentAtMillis())
+                Base64.getDecoder().decode(bm.cipherBodyB64()));
+                message.setSentAt(Instant.ofEpochMilli(bm.sentAtMillis())
                         .atZone(java.time.ZoneId.systemDefault())
-                        .toLocalDateTime());
+                        .toLocalDateTime()
+                );
         if (bm.hasAttachment() && bm.attachmentType() != null && bm.attachmentUrl() != null) {
             message.addAttachment(new MessageAttachments(message, bm.attachmentType(), bm.attachmentUrl()));
         }

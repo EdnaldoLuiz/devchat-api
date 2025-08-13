@@ -38,7 +38,7 @@ public class OAuth2LoginUseCase {
         User user = userOpt.orElseGet(() -> {
             log.info("Usuário não encontrado. Criando via OAuth2...");
             User newUser = new User(userInfo.email(), userInfo.name(), userInfo.avatar(), userInfo.bio(), provider);
-            userRepository.save(newUser);
+            userRepository.persist(newUser);
             return newUser;
         });
 

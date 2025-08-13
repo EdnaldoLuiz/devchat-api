@@ -11,7 +11,7 @@ import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatMessageResponse;
 import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatSummaryResponse;
 import com.ednaldoluiz.websocket.app.v1.chat.usecase.ListChatMessagesUseCase;
 import com.ednaldoluiz.websocket.app.v1.chat.usecase.ListChatSummariesUseCase;
-import com.ednaldoluiz.websocket.app.v1.chat.usecase.SendMessageUseCase;
+import com.ednaldoluiz.websocket.app.v1.chat.usecase.SendPrivateMessageUseCase;
 import com.ednaldoluiz.websocket.app.v1.chat.usecase.StartPrivateChatUseCase;
 
 import lombok.RequiredArgsConstructor;
@@ -20,13 +20,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ChatFacade {
 
-    private final SendMessageUseCase sendMessageUseCase;
     private final ListChatSummariesUseCase listSummariesUseCase;
     private final StartPrivateChatUseCase startPrivateChatUseCase;
+    private final SendPrivateMessageUseCase sendPrivateMessageUseCase;
     private final ListChatMessagesUseCase listChatMessagesUseCase;
 
-    public ChatMessageResponse send(Long fromUserId, SendMessageCommand cmd, Long toId) {
-        return sendMessageUseCase.execute(fromUserId, cmd, toId);
+    public ChatMessageResponse send(Long fromUserId, Long toUserId, SendMessageCommand cmd) {
+        return sendPrivateMessageUseCase.execute(fromUserId, toUserId, cmd);
     }
 
     public ChatSummaryResponse startPrivate(Long meId, StartChatRequest req) {

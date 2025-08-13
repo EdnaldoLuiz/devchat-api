@@ -47,10 +47,10 @@ public class PasswordResetUseCase {
         }
 
         user.setPassword(passwordEncoder.encode(request.password()).toCharArray());
-        userRepository.save(user);
+        userRepository.update(user);
 
         resetToken.markAsUsed();
-        tokenRepository.save(resetToken);
+        tokenRepository.update(resetToken);
         log.info("Senha redefinida com sucesso para o usuário: {}", user.getEmail());
     }
 }

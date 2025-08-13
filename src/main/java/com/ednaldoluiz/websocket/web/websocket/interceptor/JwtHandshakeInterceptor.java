@@ -74,26 +74,21 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         try {
             return Optional.ofNullable(jwtService.extractUsername(token));
         } catch (Exception e) {
-            log.warn("Falha ao extrair username do token", e);
+            log.warn("Falha ao extrair username do token {}", e.getMessage());
             return Optional.empty();
         }
     }
 
     private Optional<UserDetails> createAuthentication(UserDetails userDetails, Map<String, Object> attrs) {
-        // 1) cast para AuthUser para termos acesso ao método id()
         AuthUser authUser = (AuthUser) userDetails;
 
-        // 2) usamos o próprio ID como principal (string)
         String userId = authUser.id().toString();
 
-        // 3) mantemos as authorities vindas do AuthUser
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                userId, // principal = id do usuário
-                null, // credentials (não precisamos aqui)
+                userId,
+                null,
                 authUser.getAuthorities());
 
-        // 4) armazenamos o AuthUser completo em detalhes, caso precisemos dele mais
-        // tarde
         auth.setDetails(authUser);
 
         SecurityContextHolder.getContext().setAuthentication(auth);

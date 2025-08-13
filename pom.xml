@@ -42,10 +42,18 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
+
         <!-- Security Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.whispersystems/curve25519-java -->
+        <dependency>
+            <groupId>org.whispersystems</groupId>
+            <artifactId>curve25519-java</artifactId>
+            <version>0.5.0</version>
         </dependency>
 
         <!-- JWT Dependencies -->

@@ -34,14 +34,6 @@ public class ChatRestController {
         return chatFacade.listMessages(meId, chatId, page, size);
     }
 
-    /* ------------------------ USERS SEARCH ------------------------ */
-    @GetMapping("/users/search")
-    public List<UserSearchResponse> searchUsers(
-            @RequestParam String query,
-            @RequestParam(defaultValue = "20") int limit) {
-        return searchUsersUC.execute(query, limit);
-    }
-
     /* ------------------------ CHAT SUMMARIES ---------------------- */
     @GetMapping("/chats/summaries")
     public List<ChatSummaryResponse> listSummaries(Authentication auth) {

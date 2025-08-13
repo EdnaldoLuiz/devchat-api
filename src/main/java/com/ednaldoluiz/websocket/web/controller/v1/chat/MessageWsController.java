@@ -31,6 +31,6 @@ public class MessageWsController {
         log.info(">>> SendMessageCommand: {}", cmd);
         Long fromUserId = Long.valueOf(principal.getName());
         log.info(">>> User {} enviando mensagem privada para {}", fromUserId, toUserId);
-        chatFacade.send(fromUserId, cmd, toUserId);
+        chatFacade.send(fromUserId, toUserId, cmd);
     }
-}
+} 

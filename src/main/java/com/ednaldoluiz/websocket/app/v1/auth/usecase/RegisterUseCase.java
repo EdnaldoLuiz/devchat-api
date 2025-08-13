@@ -32,7 +32,7 @@ public class RegisterUseCase {
         String hashedPassword = passwordEncoder.encode(request.password());
         User user = new User(request.email(), hashedPassword, request.name());
 
-        userRepository.save(user);
+        userRepository.persist(user);
         user.clearPassword();
         
         String token = jwtService.generateToken(user);

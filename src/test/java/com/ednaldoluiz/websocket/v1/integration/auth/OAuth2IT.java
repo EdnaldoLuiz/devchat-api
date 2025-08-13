@@ -68,7 +68,7 @@ public class OAuth2IT extends AbstractAuthTest {
                 "",
                 "",
                 provider);
-        userRepository.save(user);
+        userRepository.persist(user);
 
         LoginRequest loginRequest = new LoginRequest(user.getEmail(), "sbduidlivei123+");
         String URI = Paths.V1.Auth.AUTH + "/oauth2";

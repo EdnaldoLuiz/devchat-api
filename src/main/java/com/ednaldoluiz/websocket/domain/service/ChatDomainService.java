@@ -1,62 +1,54 @@
 package com.ednaldoluiz.websocket.domain.service;
 
-import com.ednaldoluiz.websocket.domain.model.chat.Chat;
-import com.ednaldoluiz.websocket.domain.model.chat.ChatStatus;
-import com.ednaldoluiz.websocket.domain.model.chat.ChatType;
-import com.ednaldoluiz.websocket.domain.model.chat.UsersChat;
-import com.ednaldoluiz.websocket.domain.model.message.Message;
-import com.ednaldoluiz.websocket.domain.model.message.MessageStatus;
-import com.ednaldoluiz.websocket.domain.model.message.MessageStatusType;
-import com.ednaldoluiz.websocket.domain.model.notification.NotificationType;
-import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.repository.ChatRepository;
-import com.ednaldoluiz.websocket.infra.persistence.repository.MessageStatusRepository;
-import com.ednaldoluiz.websocket.infra.persistence.repository.UsersChatsRepository;
-import com.ednaldoluiz.websocket.web.controller.v1.chat.ChatController.NotificationDto;
+import java.util.*;
 
-import lombok.RequiredArgsConstructor;
-
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import com.ednaldoluiz.websocket.domain.event.UsersChatCreatedEvent;
+import com.ednaldoluiz.websocket.domain.model.chat.*;
+import com.ednaldoluiz.websocket.domain.model.message.*;
+import com.ednaldoluiz.websocket.domain.model.user.User;
+import com.ednaldoluiz.websocket.infra.persistence.repository.*;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatDomainService {
 
     private final ChatRepository chatRepository;
-    private final UsersChatsRepository usersChatsRepository;
-    private final MessageStatusRepository messageStatusRepository;
+    private final UsersChatsRepository  usersChatsRepository;
+    private final MessageStatusRepository msgStatusRepository;
+    private final ApplicationEventPublisher events;
 
     @Transactional
-    public Chat getOrCreatePrivateChat(User userA, User userB) {
-        List<Long> ids = Arrays.asList(userA.getId(), userB.getId());
-        Collections.sort(ids);
-
+    public Chat getOrCreatePrivateChat(User from, User to) {
+        var ids = List.of(from.getId(), to.getId()).stream().sorted().toList();
         return chatRepository.findPrivateBetween(ids.get(0), ids.get(1))
-                .orElseGet(() -> createPrivateChat(userA, userB));
+                .orElseGet(() -> createPrivateChat(from, to));
     }
 
-    private Chat createPrivateChat(User userA, User userB) {
+    private Chat createPrivateChat(User from, User to) {
         Chat chat = new Chat();
         chat.setType(ChatType.PRIVATE);
-        chat.setName(userA.getName() + " & " + userB.getName());
-        chatRepository.save(chat);
+        chat.setName(from.getName() + " & " + to.getName());
+        chatRepository.persist(chat);
 
-        usersChatsRepository.saveAll(List.of(
-                createUsersChat(userA, chat),
-                createUsersChat(userB, chat)));
+        usersChatsRepository.persistAll(List.of(
+                buildUsersChat(from, chat),
+                buildUsersChat(to, chat)));
 
+        events.publishEvent(new UsersChatCreatedEvent(chat.getId(), from.getId()));
+        events.publishEvent(new UsersChatCreatedEvent(chat.getId(), to.getId()));
+        log.debug("Chat PRIVATE {} criado entre {} e {}", chat.getId(), from.getId(), to.getId());
         return chat;
     }
 
-    private UsersChat createUsersChat(User user, Chat chat) {
+    private UsersChat buildUsersChat(User user, Chat chat) {
         UsersChat usersChat = new UsersChat();
         usersChat.setUser(user);
         usersChat.setChat(chat);
@@ -64,43 +56,17 @@ public class ChatDomainService {
     }
 
     @Transactional
-    public void updateChatStatus(Long chatId, User user, ChatStatus status) {
-        UsersChat usersChat = usersChatsRepository.findByChatIdAndUserId(chatId, user.getId())
-                .orElseThrow(() -> new IllegalStateException("Chat não encontrado para o usuário"));
-        usersChat.setStatus(status);
-        usersChatsRepository.save(usersChat);
+    public void updateChatStatus(Long chatId, Long userId, ChatStatus newStatus) {
+
+        UsersChat usersChat = usersChatsRepository.findByChatIdAndUserId(chatId, userId)
+                .orElseThrow(() -> new IllegalStateException("Chat não encontrado"));
+
+        usersChat.setStatus(newStatus);
+        usersChatsRepository.persist(usersChat);
     }
 
     @Transactional
-    public void saveMessageStatus(Message message, User user, MessageStatusType statusType) {
-        MessageStatus status = new MessageStatus(user, message, statusType);
-        messageStatusRepository.save(status);
-    }
-
-    @Transactional
-    public Message newMessage(Chat chat, User sender, UUID messageUuid) {
-        Message m = new Message();
-        m.setChat(chat);
-        m.setUser(sender);
-        m.setMessageUuid(messageUuid);
-        m.setSentAt(LocalDateTime.now());
-        return m;
-    }
-
-    @Transactional
-    public void saveStatuses(Message m, User from, User to) {
-        saveMessageStatus(m, from, MessageStatusType.SENT);
-        saveMessageStatus(m, to, MessageStatusType.DELIVERED);
-    }
-
-    public void broadcastAndNotify(
-            User from, User to, Object payload, SimpMessagingTemplate template) {
-
-        template.convertAndSendToUser(from.getId().toString(), "/queue/messages", payload);
-        template.convertAndSendToUser(to.getId().toString(), "/queue/messages", payload);
-
-        template.convertAndSendToUser(to.getId().toString(), "/queue/notify",
-                new NotificationDto(to.getId().toString(), NotificationType.MESSAGE, from.getId().toString())
-        );
+    public void saveMessageStatus(Message msg, User user, MessageStatusType st) {
+        msgStatusRepository.persist(new MessageStatus(user, msg, st));
     }
 }

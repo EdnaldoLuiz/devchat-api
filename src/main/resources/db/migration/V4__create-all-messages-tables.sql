@@ -4,6 +4,7 @@ CREATE TABLE messages (
     user_id BIGINT NOT NULL,
     message_uuid BINARY(16) UNIQUE NOT NULL,
     cipher_body MEDIUMBLOB,
+    cipher_type SMALLINT NOT NULL DEFAULT 3,
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (chat_id) REFERENCES chats(id),

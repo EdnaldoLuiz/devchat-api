@@ -12,7 +12,7 @@ public record SendMessageResponse(
     public static SendMessageResponse from(Message message) {
         return new SendMessageResponse(
             message.getId(),
-            message.getMessageText().getContent()
+            null
         );
     }
 }
