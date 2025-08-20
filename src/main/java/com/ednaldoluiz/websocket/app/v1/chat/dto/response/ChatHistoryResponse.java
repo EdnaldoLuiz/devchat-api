@@ -14,6 +14,7 @@ public record ChatHistoryResponse(
     int size,
     long total,
 
-    List<ChatMessageResponse> messages
+    List<ChatMessageResponse> messages,
+    ChatMessageResponse sessionAnchor
 
 ) {}

@@ -1,18 +1,23 @@
+// src/main/java/com/ednaldoluiz/websocket/domain/service/MessageDomainService.java
 package com.ednaldoluiz.websocket.domain.service;
 
-import org.springframework.data.redis.RedisSystemException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ednaldoluiz.websocket.app.v1.chat.command.SendMessageCommand;
-import com.ednaldoluiz.websocket.app.v1.chat.dto.response.BufferedMessage;
-import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatMessageResponse;
+import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatRealtimeEnvelopeResponse;
+import com.ednaldoluiz.websocket.domain.message.valueObject.HistoryContext;
 import com.ednaldoluiz.websocket.domain.model.chat.Chat;
+import com.ednaldoluiz.websocket.domain.model.message.CipherType;
 import com.ednaldoluiz.websocket.domain.model.message.Message;
-import com.ednaldoluiz.websocket.domain.model.message.MessageFactory;
+import com.ednaldoluiz.websocket.domain.model.message.MessageCopy;
 import com.ednaldoluiz.websocket.domain.model.user.User;
-import com.ednaldoluiz.websocket.infra.persistence.batch.RedisMessageBufferService;
+import com.ednaldoluiz.websocket.infra.persistence.repository.MessageCopyRepository;
 import com.ednaldoluiz.websocket.infra.persistence.repository.MessageRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -23,38 +28,52 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MessageDomainService {
 
-    private final RedisMessageBufferService bufferService;
-    private final MessageRepository         messageRepository;
-    private final SimpMessagingTemplate     broker;
+    private final MessageRepository messageRepository;
+    private final MessageCopyRepository copyRepository;
+    private final SimpMessagingTemplate broker;
 
-    /**
-     * Orquestra o envio de mensagem: joga em Redis buffer, faz broadcast.
-     * Fallback: salva direto no DB se Redis indisponível.
-     */
-    @Transactional(noRollbackFor = RedisSystemException.class)
-    public ChatMessageResponse send(User from, User to, Chat chat, SendMessageCommand cmd, byte[] cipherBody) {
+    @Transactional
+    public ChatRealtimeEnvelopeResponse send(
+            User from, User to, Chat chat, UUID messageUuid, LocalDateTime sentAt,
+            byte[] bodyRecipient, int typeRecipient,
+            byte[] bodySender, int typeSender,
+            HistoryContext history
+    ) {
 
-        BufferedMessage buffered = BufferedMessage.of(from, to, chat, cmd, cipherBody);
-        log.info("[SEND] uuid={} cipherType={} from={} to={} chat={}",
-        buffered.messageUuid(), buffered.cipherType(), from.getId(), to.getId(), chat.getId());
+        Objects.requireNonNull(bodyRecipient, "cipher body recipient");
+        Objects.requireNonNull(bodySender, "cipher body sender");
+        Objects.requireNonNull(history, "history context");
 
-        boolean bufferedOk = false;
-        try {
-            bufferService.push(buffered);
-            bufferedOk = true;
-        } catch (RedisSystemException ex) {
-            log.error("Redis indisponível – fallback para DB direto", ex);
-            Message entity = MessageFactory.fromBuffered(buffered, chat, from, to);
-            messageRepository.persist(entity);
-        }
+        // 1) cria mensagem + histórico (algorithm/version vindos do VO com defaults seguros)
+        Message message = Message.create(chat, from, messageUuid, sentAt, history);
+        messageRepository.persist(message);
 
-        ChatMessageResponse response = ChatMessageResponse.from(buffered, to.getId(), !bufferedOk);
-        broker.convertAndSendToUser(from.getId().toString(), "/queue/messages", response);
-        broker.convertAndSendToUser(to.getId().toString(),   "/queue/messages", response);
+        // 2) cria cópias
+        MessageCopy copyTo = MessageCopy.of(message, chat, to,   CipherType.from((short) typeRecipient), bodyRecipient);
+        MessageCopy copyMe = MessageCopy.of(message, chat, from, CipherType.from((short) typeSender),    bodySender);
 
-        log.info("Mensagem {} enfileirada (buffer Redis? {}), from={} to={} chat={}", 
-                 buffered.messageUuid(), bufferedOk, from.getId(), to.getId(), chat.getId());
+        copyRepository.persistAll(List.of(copyTo, copyMe));
 
-        return response;
+        // 3) envelopes WS
+        ChatRealtimeEnvelopeResponse dtoTo = ChatRealtimeEnvelopeResponse.fromRaw(
+                message.getId(), message.getMessageUuid(),
+                from.getId(), to.getId(),
+                typeRecipient, bodyRecipient,
+                null, message.getSentAt());
+
+        ChatRealtimeEnvelopeResponse dtoMe = ChatRealtimeEnvelopeResponse.fromRaw(
+                message.getId(), message.getMessageUuid(),
+                from.getId(), from.getId(),
+                typeSender, bodySender,
+                null, message.getSentAt());
+
+        broker.convertAndSendToUser(to.getId().toString(),   "/queue/messages", dtoTo);
+        broker.convertAndSendToUser(from.getId().toString(), "/queue/messages", dtoMe);
+
+        log.info("[SEND] uuid={} chat={} from={} to={} bytes(rec/snd)={}/{}",
+                messageUuid, chat.getId(), from.getId(), to.getId(),
+                bodyRecipient.length, bodySender.length);
+
+        return dtoMe;
     }
 }

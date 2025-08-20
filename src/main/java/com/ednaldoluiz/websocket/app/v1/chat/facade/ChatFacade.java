@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.ednaldoluiz.websocket.app.v1.chat.command.SendMessageCommand;
 import com.ednaldoluiz.websocket.app.v1.chat.dto.request.StartChatRequest;
 import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatHistoryResponse;
-import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatMessageResponse;
+import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatRealtimeEnvelopeResponse;
 import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatSummaryResponse;
 import com.ednaldoluiz.websocket.app.v1.chat.usecase.ListChatMessagesUseCase;
 import com.ednaldoluiz.websocket.app.v1.chat.usecase.ListChatSummariesUseCase;
@@ -25,7 +25,7 @@ public class ChatFacade {
     private final SendPrivateMessageUseCase sendPrivateMessageUseCase;
     private final ListChatMessagesUseCase listChatMessagesUseCase;
 
-    public ChatMessageResponse send(Long fromUserId, Long toUserId, SendMessageCommand cmd) {
+    public ChatRealtimeEnvelopeResponse send(Long fromUserId, Long toUserId, SendMessageCommand cmd) {
         return sendPrivateMessageUseCase.execute(fromUserId, toUserId, cmd);
     }
 
@@ -37,7 +37,7 @@ public class ChatFacade {
         return listSummariesUseCase.execute(userId);
     }
 
-    public ChatHistoryResponse listMessages(Long meId, Long chatId, int page, int size) {
+     public ChatHistoryResponse listMessages(Long meId, Long chatId, int page, int size) {
         return listChatMessagesUseCase.execute(meId, chatId, page, size);
     }
 }

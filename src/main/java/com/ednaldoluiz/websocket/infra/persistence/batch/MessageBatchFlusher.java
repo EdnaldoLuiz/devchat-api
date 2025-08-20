@@ -29,65 +29,65 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MessageBatchFlusher {
 
-    private final RedisMessageBufferService buffer;
-    private final MessageRepository messageRepository;
-    private final ApplicationEventPublisher events;
-    private final ChatRepository chatRepository;
-    private final UserRepository userRepository;
+    // private final RedisMessageBufferService buffer;
+    // private final MessageRepository messageRepository;
+    // private final ApplicationEventPublisher events;
+    // private final ChatRepository chatRepository;
+    // private final UserRepository userRepository;
 
-    @Transactional
-    @Scheduled(fixedDelayString = "${app.batch.flush-interval:1000}")
-    public void flush() {
-        List<BufferedMessage> batch = buffer.pollBatch();
-        if (batch.isEmpty())
-            return;
+    // @Transactional
+    // @Scheduled(fixedDelayString = "${app.batch.flush-interval:1000}")
+    // public void flush() {
+    //     List<BufferedMessage> batch = buffer.pollBatch();
+    //     if (batch.isEmpty())
+    //         return;
 
-        List<Message> entities = batch.stream()
-                .map(this::toEntity)
-                .toList();
+    //     List<Message> entities = batch.stream()
+    //             .map(this::toEntity)
+    //             .toList();
 
-        messageRepository.persistAll(entities);
+    //     messageRepository.persistAll(entities);
 
-        entities.forEach(message -> events.publishEvent(
-                new MessageCreatedEvent(
-                        message.getId(),
-                        message.getChat().getId(),
-                        message.getUser().getId(),
-                        message.getSentAt(),
-                        "[CIPHER]")));
+    //     entities.forEach(message -> events.publishEvent(
+    //             new MessageCreatedEvent(
+    //                     message.getId(),
+    //                     message.getChat().getId(),
+    //                     message.getUser().getId(),
+    //                     message.getSentAt(),
+    //                     "[CIPHER]")));
 
-        log.debug("💾 Flush {} mensagens para DB", entities.size());
-    }
+    //     log.debug("💾 Flush {} mensagens para DB", entities.size());
+    // }
 
-    private Message toEntity(BufferedMessage bm) {
-        log.info("[FLUSH->toEntity] uuid={} cipherType={} chat={} from={}",
-        bm.messageUuid(), bm.cipherType(), bm.chatId(), bm.fromId());
-        Chat chat = chatRepository.getReferenceById(bm.chatId());
-        User from = userRepository.getReferenceById(bm.fromId());
+    // private Message toEntity(BufferedMessage bm) {
+    //     log.info("[FLUSH->toEntity] uuid={} cipherType={} chat={} from={}",
+    //     bm.messageUuid(), bm.cipherType(), bm.chatId(), bm.fromId());
+    //     Chat chat = chatRepository.getReferenceById(bm.chatId());
+    //     User from = userRepository.getReferenceById(bm.fromId());
 
-        byte[] body = java.util.Base64.getDecoder().decode(bm.cipherBodyB64()); // <-- nome novo
+    //     byte[] body = java.util.Base64.getDecoder().decode(bm.cipherBodyB64()); // <-- nome novo
 
-        Message message = new Message(
-                bm.messageUuid(),
-                chat,
-                from,
-                body);
+    //     Message message = new Message(
+    //             bm.messageUuid(),
+    //             chat,
+    //             from,
+    //             body);
 
-        // **importante**: persistir o tipo de cifra
-        // se seu enum tem from(short), pode fazer cast; ou crie um fromCode(int).
-        message.setCipherType(CipherType.from((short) bm.cipherType()));
+    //     // **importante**: persistir o tipo de cifra
+    //     // se seu enum tem from(short), pode fazer cast; ou crie um fromCode(int).
+    //     message.setCipherType(CipherType.from((short) bm.cipherType()));
 
-        if (bm.hasAttachment()) {
-            message.addAttachment(new MessageAttachments(
-                    message,
-                    bm.attachmentType(),
-                    bm.attachmentUrl()));
-        }
+    //     if (bm.hasAttachment()) {
+    //         message.addAttachment(new MessageAttachments(
+    //                 message,
+    //                 bm.attachmentType(),
+    //                 bm.attachmentUrl()));
+    //     }
 
-        message.setSentAt(
-                LocalDateTime.ofInstant(
-                        Instant.ofEpochMilli(bm.sentAtMillis()),
-                        ZoneOffset.UTC));
-        return message;
-    }
+    //     message.setSentAt(
+    //             LocalDateTime.ofInstant(
+    //                     Instant.ofEpochMilli(bm.sentAtMillis()),
+    //                     ZoneOffset.UTC));
+    //     return message;
+    // }
 }

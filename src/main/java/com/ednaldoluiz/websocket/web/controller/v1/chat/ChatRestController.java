@@ -10,8 +10,6 @@ import com.ednaldoluiz.websocket.app.v1.chat.dto.request.StartChatRequest;
 import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatHistoryResponse;
 import com.ednaldoluiz.websocket.app.v1.chat.dto.response.ChatSummaryResponse;
 import com.ednaldoluiz.websocket.app.v1.chat.facade.ChatFacade;
-import com.ednaldoluiz.websocket.app.v1.user.dto.response.UserSearchResponse;
-import com.ednaldoluiz.websocket.app.v1.user.usecase.SearchUsersUseCase;
 import com.ednaldoluiz.websocket.web.websocket.store.AuthUser;
 
 import lombok.RequiredArgsConstructor;
@@ -22,14 +20,14 @@ import lombok.RequiredArgsConstructor;
 public class ChatRestController {
 
     private final ChatFacade chatFacade;
-    private final SearchUsersUseCase searchUsersUC;
 
     @GetMapping("/chats/{chatId}/messages")
     public ChatHistoryResponse listMessages(
             Authentication auth,
             @PathVariable Long chatId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size) {
+            @RequestParam(defaultValue = "50") int size
+        ) {
         Long meId = ((AuthUser) auth.getPrincipal()).id();
         return chatFacade.listMessages(meId, chatId, page, size);
     }
